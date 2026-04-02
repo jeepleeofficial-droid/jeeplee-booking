@@ -1,0 +1,7 @@
+cd jeeplee-booking
+git init
+git add .
+git commit -m "init"
+# GitHub 新建 repo 叫 jeeplee-booking，然後：
+git remote add origin https://github.com/你的帳號/jeeplee-booking.git
+git push -u origin main
