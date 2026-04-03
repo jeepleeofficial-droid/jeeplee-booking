@@ -158,7 +158,11 @@ input,textarea,select,button{font-family:inherit}
     </div>
     <div class="prop-row">
       <span class="prop-label">聯絡人</span>
-      <input class="n-input prop-value" id="f-contact" placeholder="姓名、電話或 Line…" />
+      <input class="n-input prop-value" id="f-contact" placeholder="姓名…" />
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">聯絡方式</span>
+      <input class="n-input prop-value" id="f-contact-method" placeholder="電話或 Line ID…" />
     </div>
     <div class="prop-row">
       <span class="prop-label">日期</span>
@@ -424,6 +428,7 @@ function renderDetail() {
 function resetForm() {
   document.getElementById('f-band').value    = '';
   document.getElementById('f-contact').value = '';
+  document.getElementById('f-contact-method').value = '';
   document.getElementById('f-notes').value   = '';
   document.getElementById('f-date').value    = today;
   startSlot = 20; endSlot = 28;
@@ -438,14 +443,15 @@ function resetForm() {
 function syncHTML(g, n) {
   function dot(s){ return '<span class="dot dot-'+s+'"></span>'; }
   function lbl(s){ return s==='spin'?'同步中…':s==='ok'?'同步成功':'同步失敗'; }
-  return '<div class="sync-row">'+dot(g)+' _　'+lbl(g)+'</div>'
-       + '<div class="sync-row">'+dot(n)+' _　'+lbl(n)+'</div>';
+  return '<div class="sync-row">'+dot(g)+' Google 日曆　'+lbl(g)+'</div>'
+       + '<div class="sync-row">'+dot(n)+' Notion　'+lbl(n)+'</div>';
 }
 
 // ── 送出預訂 ──────────────────────────────────
 function handleSubmit() {
   var band    = document.getElementById('f-band').value.trim();
   var contact = document.getElementById('f-contact').value.trim();
+  var contactMethod = document.getElementById('f-contact-method').value.trim();
   var date    = document.getElementById('f-date').value;
   var notes   = document.getElementById('f-notes').value.trim();
   var ea      = document.getElementById('err-area');
@@ -479,9 +485,9 @@ function handleSubmit() {
   var endLabel   = slotToLabel(endSlot);
 
   var payload = {
-    bandName: band, contact: contact, date: date,
+    bandName: band, contact: contact, contactMethod: contactMethod, date: date,
     startTime: startStr, endTime: endStr, endDate: endDate,
-    clientType: '新客', bandType: '樂團', bookingStatus: '已確認', payStatus: '未付款',
+    clientType: '新客', bandType: '樂團', bookingStatus: '待確認', payStatus: '未付款',
     notes: notes
   };
 
