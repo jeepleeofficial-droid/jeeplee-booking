@@ -22,10 +22,7 @@ input,textarea,select,button{font-family:inherit}
 .n-input:hover,.n-input:focus{background:#f1f1ef}
 .n-input::placeholder{color:#ccc}
 .n-input.required-empty{background:#fff5f5}
-.n-select{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;cursor:pointer;appearance:none;transition:background .12s}
-.n-select:hover,.n-select:focus{background:#f1f1ef}
 .divider{height:1px;background:#f0f0f0;margin:1.25rem 0}
-
 .alert{border-radius:0 7px 7px 0;padding:.55rem .9rem;margin:.6rem 0;font-size:13px;line-height:1.5}
 .alert-warn{background:#fffbf0;border-left:3px solid #f0c040;color:#9a7000}
 .alert-err{background:#fff2f2;border-left:3px solid #e05c5c;color:#b03030}
@@ -69,12 +66,28 @@ input,textarea,select,button{font-family:inherit}
 .ext-link{color:#0060c0;font-size:13px;text-decoration:none}
 .ext-link:hover{text-decoration:underline}
 .required-mark{color:#e05c5c;margin-left:2px;font-size:12px}
-/* 使用須知 */
 .notice-box{background:#f7f7f5;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;border-left:3px solid #1a1a1a}
 .notice-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:.6rem}
 .notice-list{list-style:none;padding:0;margin:0}
 .notice-list li{font-size:13px;color:#555;padding:3px 0 3px 1rem;position:relative;line-height:1.6}
 .notice-list li::before{content:'·';position:absolute;left:0;color:#9b9b9b}
+/* 時間滑桿 */
+.slider-section{margin:.75rem 0 1.25rem}
+.slider-label{font-size:14px;color:#9b9b9b;margin-bottom:.75rem}
+.track-area{position:relative;height:44px;cursor:pointer;user-select:none}
+.track-bg{position:absolute;top:50%;left:0;right:0;height:3px;background:#e8e8e8;border-radius:2px;transform:translateY(-50%)}
+.track-fill{position:absolute;top:50%;height:3px;background:#1a1a1a;border-radius:2px;transform:translateY(-50%);pointer-events:none}
+.s-thumb{position:absolute;top:50%;width:18px;height:18px;background:#fff;border:2px solid #1a1a1a;border-radius:50%;transform:translate(-50%,-50%);cursor:grab;touch-action:none;transition:box-shadow .15s}
+.s-thumb:active{cursor:grabbing;box-shadow:0 0 0 4px #e8e8e8}
+.tick-row{display:flex;justify-content:space-between;margin-bottom:.75rem}
+.tick{font-size:10px;color:#ccc;text-align:center}
+.time-result{display:flex;align-items:center;gap:12px;padding:.75rem 1rem;background:#f7f7f5;border-radius:8px}
+.time-block{flex:1}
+.time-block-label{font-size:11px;color:#9b9b9b;margin-bottom:2px}
+.time-block-val{font-size:20px;font-weight:600;color:#1a1a1a;letter-spacing:-.5px}
+.time-sep{font-size:16px;color:#ccc;flex-shrink:0}
+.time-dur{font-size:13px;color:#9b9b9b;margin-left:auto}
+.next-day-tag{display:inline-block;font-size:11px;color:#555;background:#e8e8e8;border-radius:999px;padding:1px 7px;margin-top:3px}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.show{opacity:1;pointer-events:all}
@@ -128,7 +141,7 @@ input,textarea,select,button{font-family:inherit}
       <ul class="notice-list">
         <li>預約時間最少 2 小時</li>
         <li>取消或改期請於 48 小時前告知，否則收取全額費用</li>
-        <li>付款方式：現金或轉帳，進場前完成付款</li>
+        <li>付款方式：現金或轉帳，彩排完成付款</li>
         <li>請愛護設備，損壞需照價賠償</li>
         <li>禁止攜帶外食及飲料入內（水除外）</li>
         <li>如有問題請聯繫：jeeplee.official@gmail.com</li>
@@ -151,15 +164,39 @@ input,textarea,select,button{font-family:inherit}
       <span class="prop-label">日期</span>
       <input class="n-input prop-value" id="f-date" type="date" />
     </div>
-    <div class="prop-row">
-      <span class="prop-label">開始時間</span>
-      <select class="n-select prop-value" id="f-start"></select>
+
+    <!-- 時間滑桿 -->
+    <div class="slider-section">
+      <div class="slider-label">時段</div>
+      <div class="track-area" id="track-area">
+        <div class="track-bg"></div>
+        <div class="track-fill" id="track-fill"></div>
+        <div class="s-thumb" id="thumb-s"></div>
+        <div class="s-thumb" id="thumb-e"></div>
+      </div>
+      <div class="tick-row">
+        <div class="tick">00:00</div>
+        <div class="tick">06:00</div>
+        <div class="tick">12:00</div>
+        <div class="tick">18:00</div>
+        <div class="tick">24:00</div>
+        <div class="tick">28:00</div>
+      </div>
+      <div class="time-result">
+        <div class="time-block">
+          <div class="time-block-label">開始</div>
+          <div class="time-block-val" id="disp-start">10:00</div>
+        </div>
+        <div class="time-sep">→</div>
+        <div class="time-block">
+          <div class="time-block-label">結束</div>
+          <div class="time-block-val" id="disp-end">14:00</div>
+          <div id="next-day-tag" style="display:none"><span class="next-day-tag">隔天</span></div>
+        </div>
+        <div class="time-dur" id="disp-dur">4 hr</div>
+      </div>
     </div>
-    <div class="prop-row">
-      <span class="prop-label">結束時間</span>
-      <select class="n-select prop-value" id="f-end"></select>
-    </div>
-    <div id="midnight-note" style="font-size:12px;color:#9b9b9b;padding:2px 0 4px 130px;display:none">結束時間為隔天</div>
+
     <div class="prop-row" style="align-items:flex-start">
       <span class="prop-label" style="padding-top:6px">Rider<span class="required-mark">*</span></span>
       <textarea class="n-input prop-value" id="f-notes" rows="4" placeholder="請輸入 Rider 需求（樂器、設備、人數等）…" style="resize:vertical;line-height:1.55"></textarea>
@@ -205,13 +242,129 @@ var cy = new Date().getFullYear();
 var cm = new Date().getMonth();
 var today = new Date().toISOString().slice(0,10);
 
+// ── 滑桿狀態（每格 = 30 分鐘，0~56 格）──────
+var MAX_SLOT = 56; // 28hr * 2
+var startSlot = 20; // 10:00
+var endSlot   = 28; // 14:00
+
+function slotToMins(s) { return s * 30; }
+function slotToLabel(s) {
+  var total = s * 30;
+  var h = Math.floor(total / 60);
+  var m = total % 60;
+  return pad(h) + ':' + pad(m);
+}
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+function minsToTimeStr(mins) {
+  var h = Math.floor(mins / 60) % 24;
+  var m = mins % 60;
+  return pad(h) + ':' + pad(m);
+}
+function getEndDate(baseDate, endMins) {
+  if (endMins >= 1440) {
+    var d = new Date(baseDate);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0,10);
+  }
+  return baseDate;
+}
+
+// ── 滑桿 render ───────────────────────────────
+function renderSlider() {
+  var fill = document.getElementById('track-fill');
+  var ts   = document.getElementById('thumb-s');
+  var te   = document.getElementById('thumb-e');
+  var pctS = (startSlot / MAX_SLOT * 100).toFixed(2);
+  var pctE = (endSlot   / MAX_SLOT * 100).toFixed(2);
+  fill.style.left  = pctS + '%';
+  fill.style.width = (pctE - pctS) + '%';
+  ts.style.left = pctS + '%';
+  te.style.left = pctE + '%';
+
+  var startMins = slotToMins(startSlot);
+  var endMins   = slotToMins(endSlot);
+  document.getElementById('disp-start').textContent = slotToLabel(startSlot);
+  document.getElementById('disp-end').textContent   = slotToLabel(endSlot);
+  var durH = (endSlot - startSlot) / 2;
+  document.getElementById('disp-dur').textContent = (durH % 1 === 0 ? durH : durH.toFixed(1)) + ' hr';
+  document.getElementById('next-day-tag').style.display = endMins >= 1440 ? '' : 'none';
+
+  checkConflict();
+}
+
+function slotFromX(x) {
+  var area = document.getElementById('track-area');
+  var rect = area.getBoundingClientRect();
+  var ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+  return Math.round(ratio * MAX_SLOT);
+}
+
+function initDrag(isStart) {
+  return function(e) {
+    e.preventDefault();
+    var onMove = function(ev) {
+      var x = ev.touches ? ev.touches[0].clientX : ev.clientX;
+      var s = slotFromX(x);
+      if (isStart) {
+        startSlot = Math.max(0, Math.min(s, endSlot - 2));
+      } else {
+        endSlot = Math.min(MAX_SLOT, Math.max(s, startSlot + 2));
+      }
+      renderSlider();
+    };
+    var onUp = function() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, {passive:true});
+    document.addEventListener('touchend', onUp);
+  };
+}
+
+document.getElementById('thumb-s').addEventListener('mousedown', initDrag(true));
+document.getElementById('thumb-s').addEventListener('touchstart', initDrag(true), {passive:false});
+document.getElementById('thumb-e').addEventListener('mousedown', initDrag(false));
+document.getElementById('thumb-e').addEventListener('touchstart', initDrag(false), {passive:false});
+
+// ── 衝突偵測 ──────────────────────────────────
+function t2m(t) {
+  var parts = t.split(':');
+  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+
+function overlapCheck(b, startMins, endMins, date) {
+  var aStart = t2m(b.startTime);
+  var aEnd   = t2m(b.endTime);
+  if (aEnd <= aStart) aEnd += 1440;
+  if (b.date === date) {
+    return startMins < aEnd && aStart < endMins;
+  }
+  var prev = new Date(date);
+  prev.setDate(prev.getDate() - 1);
+  var prevStr = prev.toISOString().slice(0,10);
+  if (b.date === prevStr && endMins >= 1440) {
+    return (startMins + 1440) < aEnd && aStart < endMins;
+  }
+  return false;
+}
+
+function checkConflict() {
+  var date = document.getElementById('f-date').value;
+  var startMins = slotToMins(startSlot);
+  var endMins   = slotToMins(endSlot);
+  var conflicts = date ? bookings.filter(function(b){ return overlapCheck(b, startMins, endMins, date); }) : [];
+  document.getElementById('conflict-area').innerHTML = conflicts.length
+    ? '<div class="alert alert-warn">該時段已滿額，請選擇其他時間</div>' : '';
+  document.getElementById('submit-btn').disabled = conflicts.length > 0;
+}
+
 // ── Modal ─────────────────────────────────────
-function showModal() {
-  document.getElementById('conflict-modal').classList.add('show');
-}
-function closeModal() {
-  document.getElementById('conflict-modal').classList.remove('show');
-}
+function showModal() { document.getElementById('conflict-modal').classList.add('show'); }
+function closeModal() { document.getElementById('conflict-modal').classList.remove('show'); }
 document.getElementById('conflict-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
@@ -231,21 +384,18 @@ function switchTab(tab) {
 
 // ── 月曆 ──────────────────────────────────────
 function changeMonth(d) {
-  var dt = new Date(cy, cm + d);
-  cy = dt.getFullYear();
-  cm = dt.getMonth();
-  renderCal();
+  var dt = new Date(cy, cm+d); cy=dt.getFullYear(); cm=dt.getMonth(); renderCal();
 }
 
 function renderCal() {
   document.getElementById('month-label').textContent = cy + ' 年 ' + (cm+1) + ' 月';
-  var first = new Date(cy, cm, 1).getDay();
-  var days  = new Date(cy, cm+1, 0).getDate();
+  var first = new Date(cy,cm,1).getDay();
+  var days  = new Date(cy,cm+1,0).getDate();
   var body  = document.getElementById('cal-body');
   body.innerHTML = '';
   for (var i = 0; i < first; i++) body.appendChild(document.createElement('div'));
   for (var d = 1; d <= days; d++) {
-    var ds = cy + '-' + String(cm+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var ds = cy + '-' + pad(cm+1) + '-' + pad(d);
     var bks = bookings.filter(function(b){ return b.date === ds; });
     var el = document.createElement('div');
     el.className = 'cal-day' + (ds===today?' today':'') + (ds===selDate?' selected':'');
@@ -262,92 +412,12 @@ function renderDetail() {
   document.getElementById('detail-date').textContent = selDate;
   var bks = bookings.filter(function(b){ return b.date === selDate; });
   var list = document.getElementById('detail-list');
-  if (!bks.length) { list.innerHTML = '<div class="empty">此日尚無預訂</div>'; return; }
+  if (!bks.length) { list.innerHTML='<div class="empty">此日尚無預訂</div>'; return; }
   list.innerHTML = bks.map(function(b) {
     var sm = t2m(b.startTime), em = t2m(b.endTime);
-    var hrs = ((em > sm ? em - sm : em + 1440 - sm) / 60).toFixed(1);
+    var hrs = ((em > sm ? em-sm : em+1440-sm) / 60).toFixed(1);
     return '<div class="b-item"><div class="b-bar"></div><div><div class="b-time">'+b.startTime+' – '+b.endTime+'</div><div class="b-status">已預定 · '+hrs+'hr</div></div></div>';
   }).join('');
-}
-
-// ── 時間工具 ──────────────────────────────────
-function t2m(t) {
-  var parts = t.split(':');
-  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-}
-
-function minsToTime(mins) {
-  var h = Math.floor(mins / 60) % 24;
-  var m = mins % 60;
-  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
-}
-
-function getEndDate(baseDate, endMins) {
-  if (endMins >= 1440) {
-    var d = new Date(baseDate);
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0,10);
-  }
-  return baseDate;
-}
-
-function overlapCheck(b, startMins, endMins, date) {
-  var aStart = t2m(b.startTime);
-  var aEnd   = t2m(b.endTime);
-  if (aEnd <= aStart) aEnd += 1440;
-  if (b.date === date) {
-    return startMins < aEnd && aStart < endMins;
-  }
-  var prev = new Date(date);
-  prev.setDate(prev.getDate() - 1);
-  var prevStr = prev.toISOString().slice(0,10);
-  if (b.date === prevStr && endMins >= 1440) {
-    return (startMins + 1440) < aEnd && aStart < endMins;
-  }
-  return false;
-}
-
-// ── 建立時間下拉選單 ──────────────────────────
-function buildTimeOptions() {
-  var opts = [];
-  for (var h = 0; h < 24; h++) {
-    for (var m = 0; m < 60; m += 30) {
-      opts.push({ value: h*60+m, label: String(h).padStart(2,'0')+':'+String(m).padStart(2,'0') });
-    }
-  }
-  for (var h = 0; h < 6; h++) {
-    for (var m = 0; m < 60; m += 30) {
-      opts.push({ value: (h+24)*60+m, label: String(h+24).padStart(2,'0')+':'+String(m).padStart(2,'0') });
-    }
-  }
-  return opts;
-}
-var TIME_OPTS = buildTimeOptions();
-
-function populateTimeSelects() {
-  ['f-start','f-end'].forEach(function(id) {
-    var sel = document.getElementById(id);
-    sel.innerHTML = TIME_OPTS.map(function(o) {
-      return '<option value="'+o.value+'">'+o.label+'</option>';
-    }).join('');
-  });
-  document.getElementById('f-start').value = 600;
-  document.getElementById('f-end').value   = 720;
-}
-
-// ── 費用計算 ──────────────────────────────────
-function updateCost() {
-  var startMins = parseInt(document.getElementById('f-start').value);
-  var endMins   = parseInt(document.getElementById('f-end').value);
-  var d = document.getElementById('f-date').value;
-  var hrs = endMins > startMins ? (endMins - startMins) / 60 : 0;
-
-  document.getElementById('midnight-note').style.display = endMins >= 1440 ? '' : 'none';
-
-  var conflicts = d && hrs > 0 ? bookings.filter(function(b){ return overlapCheck(b, startMins, endMins, d); }) : [];
-  document.getElementById('conflict-area').innerHTML = conflicts.length
-    ? '<div class="alert alert-warn">該時段已滿額，請選擇其他時間</div>' : '';
-  document.getElementById('submit-btn').disabled = conflicts.length > 0 || hrs <= 0;
 }
 
 // ── 重設表單 ──────────────────────────────────
@@ -355,22 +425,19 @@ function resetForm() {
   document.getElementById('f-band').value    = '';
   document.getElementById('f-contact').value = '';
   document.getElementById('f-notes').value   = '';
-  document.getElementById('f-start').value   = 600;
-  document.getElementById('f-end').value     = 720;
   document.getElementById('f-date').value    = today;
-  document.getElementById('midnight-note').style.display = 'none';
+  startSlot = 20; endSlot = 28;
+  renderSlider();
   document.getElementById('f-notes').classList.remove('required-empty');
   document.getElementById('submit-btn').disabled = false;
-  ['err-area','cost-area','conflict-area','sync-area'].forEach(function(id){
-    document.getElementById(id).innerHTML = '';
-  });
+  ['err-area','conflict-area','sync-area'].forEach(function(id){ document.getElementById(id).innerHTML=''; });
   switchTab('book');
 }
 
 // ── 同步狀態 ──────────────────────────────────
 function syncHTML(g, n) {
-  function dot(s) { return '<span class="dot dot-'+s+'"></span>'; }
-  function lbl(s) { return s==='spin'?'同步中…':s==='ok'?'同步成功':'同步失敗'; }
+  function dot(s){ return '<span class="dot dot-'+s+'"></span>'; }
+  function lbl(s){ return s==='spin'?'同步中…':s==='ok'?'同步成功':'同步失敗'; }
   return '<div class="sync-row">'+dot(g)+' Google 日曆　'+lbl(g)+'</div>'
        + '<div class="sync-row">'+dot(n)+' Notion　'+lbl(n)+'</div>';
 }
@@ -380,43 +447,36 @@ function handleSubmit() {
   var band    = document.getElementById('f-band').value.trim();
   var contact = document.getElementById('f-contact').value.trim();
   var date    = document.getElementById('f-date').value;
-  var startMins = parseInt(document.getElementById('f-start').value);
-  var endMins   = parseInt(document.getElementById('f-end').value);
   var notes   = document.getElementById('f-notes').value.trim();
   var ea      = document.getElementById('err-area');
   var riderEl = document.getElementById('f-notes');
+  var startMins = slotToMins(startSlot);
+  var endMins   = slotToMins(endSlot);
 
   if (!notes) {
-    riderEl.classList.add('required-empty');
-    riderEl.focus();
-    ea.innerHTML = '<div class="alert alert-err">請填寫 Rider 需求</div>';
-    return;
+    riderEl.classList.add('required-empty'); riderEl.focus();
+    ea.innerHTML = '<div class="alert alert-err">請填寫 Rider 需求</div>'; return;
   }
   riderEl.classList.remove('required-empty');
-
   if (!band || !date) {
-    ea.innerHTML = '<div class="alert alert-err">請填寫所有必填欄位（樂團、日期）</div>';
-    return;
+    ea.innerHTML = '<div class="alert alert-err">請填寫所有必填欄位（樂團、日期）</div>'; return;
   }
   var hrs = (endMins - startMins) / 60;
   if (hrs <= 0) {
-    ea.innerHTML = '<div class="alert alert-err">結束時間必須晚於開始時間</div>';
-    return;
+    ea.innerHTML = '<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return;
   }
-
-  var conflicts = date && hrs > 0 ? bookings.filter(function(b){ return overlapCheck(b, startMins, endMins, date); }) : [];
+  var conflicts = bookings.filter(function(b){ return overlapCheck(b, startMins, endMins, date); });
   if (conflicts.length > 0) { showModal(); return; }
 
   ea.innerHTML = '';
   var btn = document.getElementById('submit-btn');
-  btn.disabled = true;
-  btn.textContent = '建立中…';
+  btn.disabled = true; btn.textContent = '建立中…';
 
-  var startStr   = minsToTime(startMins);
-  var endStr     = minsToTime(endMins);
-  var endDate    = getEndDate(date, endMins);
-  var startLabel = TIME_OPTS.find(function(o){ return o.value===startMins; }).label;
-  var endLabel   = TIME_OPTS.find(function(o){ return o.value===endMins; }).label;
+  var startStr = minsToTimeStr(startMins);
+  var endStr   = minsToTimeStr(endMins);
+  var endDate  = getEndDate(date, endMins);
+  var startLabel = slotToLabel(startSlot);
+  var endLabel   = slotToLabel(endSlot);
 
   var payload = {
     bandName: band, contact: contact, date: date,
@@ -428,19 +488,18 @@ function handleSubmit() {
   document.getElementById('sync-area').innerHTML = syncHTML('spin','spin');
 
   Promise.allSettled([
-    fetch('/api/google-calendar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }).then(function(r){ return r.json(); }),
-    fetch('/api/notion',          { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }).then(function(r){ return r.json(); })
+    fetch('/api/google-calendar', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();}),
+    fetch('/api/notion',          {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();})
   ]).then(function(results) {
     var gcal   = results[0].status==='fulfilled' ? results[0].value : {ok:false};
     var notion = results[1].status==='fulfilled' ? results[1].value : {ok:false};
-
     document.getElementById('sync-area').innerHTML = syncHTML(gcal.ok?'ok':'err', notion.ok?'ok':'err');
 
     if (gcal.ok || notion.ok) {
-      bookings.push({ id: Date.now()+'', bandName: band, date: date, startTime: startStr, endTime: endStr });
+      bookings.push({id:Date.now()+'', bandName:band, date:date, startTime:startStr, endTime:endStr});
       var timeRange = endMins >= 1440
-        ? startLabel + ' – ' + endLabel + '（隔天）（' + hrs + 'hr）'
-        : startLabel + ' – ' + endLabel + '（' + hrs + 'hr）';
+        ? startLabel+' – '+endLabel+'（隔天）（'+hrs+'hr）'
+        : startLabel+' – '+endLabel+'（'+hrs+'hr）';
       var cd = document.getElementById('confirm-detail');
       var rows = [['樂團',band],['日期',date],['時段',timeRange],['Rider',notes]];
       cd.innerHTML = rows.map(function(r){
@@ -458,24 +517,21 @@ function handleSubmit() {
       document.querySelectorAll('.tab').forEach(function(el){ el.classList.remove('active'); });
     } else {
       ea.innerHTML = '<div class="alert alert-err">同步失敗，請稍後再試</div>';
-      btn.disabled = false;
-      btn.textContent = '建立預訂';
+      btn.disabled = false; btn.textContent = '建立預訂';
     }
   });
 }
 
 // ── 載入預訂 ──────────────────────────────────
 function fetchBookings() {
-  fetch('/api/google-calendar').then(function(r){ return r.json(); }).then(function(d){
+  fetch('/api/google-calendar').then(function(r){return r.json();}).then(function(d){
     if (d.ok && Array.isArray(d.bookings)) bookings = d.bookings;
     renderCal();
   }).catch(function(){ renderCal(); });
 }
 
 // ── 事件監聽 ──────────────────────────────────
-document.getElementById('f-start').addEventListener('change', updateCost);
-document.getElementById('f-end').addEventListener('change', updateCost);
-document.getElementById('f-date').addEventListener('change', updateCost);
+document.getElementById('f-date').addEventListener('change', checkConflict);
 document.getElementById('f-notes').addEventListener('input', function(){
   if (this.value.trim()) this.classList.remove('required-empty');
 });
@@ -483,7 +539,7 @@ document.getElementById('f-notes').addEventListener('input', function(){
 // ── 初始化 ────────────────────────────────────
 document.getElementById('f-date').min   = today;
 document.getElementById('f-date').value = today;
-populateTimeSelects();
+renderSlider();
 renderCal();
 fetchBookings();
 </script>
