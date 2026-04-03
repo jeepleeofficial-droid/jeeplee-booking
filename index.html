@@ -21,9 +21,7 @@ input,textarea,select,button{font-family:inherit}
 .n-input{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;transition:background .12s}
 .n-input:hover,.n-input:focus{background:#f1f1ef}
 .n-input::placeholder{color:#ccc}
-.n-select{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;cursor:pointer;appearance:none;transition:background .12s}
-.n-select:hover,.n-select:focus{background:#f1f1ef}
-.section-head{font-size:11px;font-weight:500;color:#ccc;letter-spacing:.07em;text-transform:uppercase;padding:.9rem 0 .4rem;border-top:1px solid #f0f0f0;margin-top:.4rem}
+.n-input.required-empty{background:#fff5f5}
 .divider{height:1px;background:#f0f0f0;margin:1.25rem 0}
 .cost-box{background:#f7f7f5;border-radius:8px;padding:.7rem 1rem;display:flex;justify-content:space-between;align-items:center;margin:.9rem 0}
 .cost-label{font-size:13px;color:#9b9b9b}
@@ -70,6 +68,7 @@ input,textarea,select,button{font-family:inherit}
 .detail-key{color:#9b9b9b}
 .ext-link{color:#0060c0;font-size:13px;text-decoration:none}
 .ext-link:hover{text-decoration:underline}
+.required-mark{color:#e05c5c;margin-left:2px;font-size:12px}
 </style>
 </head>
 <body>
@@ -123,43 +122,8 @@ input,textarea,select,button{font-family:inherit}
       <span class="prop-label">結束時間</span>
       <input class="n-input prop-value" id="f-end" type="time" value="12:00" step="1800" />
     </div>
-
-    <div class="section-head">分類</div>
-
-    <div class="prop-row">
-      <span class="prop-label">客戶類型</span>
-      <select class="n-select prop-value" id="f-client">
-        <option value="新客">新客</option>
-        <option value="老客">老客</option>
-        <option value="VIP">VIP</option>
-      </select>
-    </div>
-    <div class="prop-row">
-      <span class="prop-label">樂團類型</span>
-      <select class="n-select prop-value" id="f-btype">
-        <option value="樂團">樂團</option>
-        <option value="個人">個人</option>
-        <option value="錄音">錄音</option>
-        <option value="其他">其他</option>
-      </select>
-    </div>
-    <div class="prop-row">
-      <span class="prop-label">預訂狀態</span>
-      <select class="n-select prop-value" id="f-bstatus">
-        <option value="已確認">已確認</option>
-        <option value="待確認">待確認</option>
-      </select>
-    </div>
-    <div class="prop-row">
-      <span class="prop-label">付款狀態</span>
-      <select class="n-select prop-value" id="f-pstatus">
-        <option value="未付款">未付款</option>
-        <option value="已付款">已付款</option>
-        <option value="待確認">待確認</option>
-      </select>
-    </div>
     <div class="prop-row" style="align-items:flex-start">
-      <span class="prop-label" style="padding-top:6px">Rider</span>
+      <span class="prop-label" style="padding-top:6px">Rider<span class="required-mark">*</span></span>
       <textarea class="n-input prop-value" id="f-notes" rows="4" placeholder="請輸入 Rider 需求（樂器、設備、人數等）…" style="resize:vertical;line-height:1.55"></textarea>
     </div>
 
@@ -222,7 +186,6 @@ function renderCal() {
     const bks = bookings.filter(b=>b.date===ds);
     const el = document.createElement('div');
     el.className = 'cal-day'+(ds===today?' today':'')+(ds===selDate?' selected':'');
-    // 只顯示時間，不顯示名字
     const slots = bks.slice(0,2).map(b=>`<div class="booked-slot">${b.startTime}–${b.endTime} 已預定</div>`).join('');
     const more = bks.length>2 ? `<div class="booked-slot">+${bks.length-2} 筆</div>` : '';
     el.innerHTML = `<div class="day-num">${d}</div>${slots}${more}`;
@@ -237,15 +200,12 @@ function renderDetail() {
   const bks = bookings.filter(b=>b.date===selDate);
   const list = document.getElementById('detail-list');
   if(!bks.length){ list.innerHTML='<div class="empty">此日尚無預訂</div>'; return; }
-  // 日曆只顯示時間與「已預定」，不顯示名字
   list.innerHTML = bks.map(b => {
     const hrs = ((t2m(b.endTime)-t2m(b.startTime))/60).toFixed(1);
     return `<div class="b-item">
       <div class="b-bar"></div>
-      <div>
-        <div class="b-time">${b.startTime} – ${b.endTime}</div>
-        <div class="b-status">已預定 · ${hrs}hr</div>
-      </div>
+      <div><div class="b-time">${b.startTime} – ${b.endTime}</div>
+      <div class="b-status">已預定 · ${hrs}hr</div></div>
     </div>`;
   }).join('');
 }
@@ -272,11 +232,8 @@ function resetForm() {
   document.getElementById('f-start').value='10:00';
   document.getElementById('f-end').value='12:00';
   document.getElementById('f-date').value=today;
-  document.getElementById('f-client').value='新客';
-  document.getElementById('f-btype').value='樂團';
-  document.getElementById('f-bstatus').value='已確認';
-  document.getElementById('f-pstatus').value='未付款';
   ['err-area','cost-area','conflict-area','sync-area'].forEach(id=>document.getElementById(id).innerHTML='');
+  document.getElementById('f-notes').classList.remove('required-empty');
   document.getElementById('submit-btn').disabled=false;
   switchTab('book');
 }
@@ -294,12 +251,19 @@ async function handleSubmit() {
   const start   = document.getElementById('f-start').value;
   const end     = document.getElementById('f-end').value;
   const notes   = document.getElementById('f-notes').value.trim();
-  const clientType    = document.getElementById('f-client').value;
-  const bandType      = document.getElementById('f-btype').value;
-  const bookingStatus = document.getElementById('f-bstatus').value;
-  const payStatus     = document.getElementById('f-pstatus').value;
-
   const ea = document.getElementById('err-area');
+  const riderEl = document.getElementById('f-notes');
+
+  // Rider 必填驗證
+  if(!notes) {
+    riderEl.classList.add('required-empty');
+    riderEl.focus();
+    ea.innerHTML='<div class="alert alert-err">請填寫 Rider 需求</div>';
+    return;
+  } else {
+    riderEl.classList.remove('required-empty');
+  }
+
   if(!band||!date||!start||!end){ ea.innerHTML='<div class="alert alert-err">請填寫所有必填欄位（樂團、日期、時間）</div>'; return; }
   const hrs = (t2m(end)-t2m(start))/60;
   if(hrs<=0){ ea.innerHTML='<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
@@ -308,7 +272,8 @@ async function handleSubmit() {
   const btn = document.getElementById('submit-btn');
   btn.disabled=true; btn.textContent='建立中…';
   const cost = Math.round(hrs*RATE);
-  const payload = { bandName:band, contact, date, startTime:start, endTime:end, hours:hrs, cost, clientType, bandType, bookingStatus, payStatus, notes };
+  const payload = { bandName:band, contact, date, startTime:start, endTime:end, hours:hrs, cost,
+    clientType:'新客', bandType:'樂團', bookingStatus:'已確認', payStatus:'未付款', notes };
 
   document.getElementById('sync-area').innerHTML = syncHTML('spin','spin');
 
@@ -323,14 +288,14 @@ async function handleSubmit() {
   document.getElementById('sync-area').innerHTML = syncHTML(gcal.ok?'ok':'err', notion.ok?'ok':'err');
 
   if(gcal.ok || notion.ok) {
-    bookings.push({id:Date.now()+'', bandName:band, date, startTime:start, endTime:end, clientType, bandType, bookingStatus});
+    bookings.push({id:Date.now()+'', bandName:band, date, startTime:start, endTime:end});
     const cd = document.getElementById('confirm-detail');
     cd.innerHTML = [
-      ['樂團',band],['日期',date],['時段',`${start} – ${end}（${hrs}hr）`],
-      ['費用',`NT$${cost.toLocaleString()}`],['客戶類型',clientType],
-      ['樂團類型',bandType],['預訂狀態',bookingStatus],['付款狀態',payStatus],
-      notes&&['Rider',notes],
-    ].filter(Boolean).map(([k,v])=>`<div class="detail-row"><span class="detail-key">${k}</span><span>${v}</span></div>`).join('');
+      ['樂團',band],['日期',date],
+      ['時段',`${start} – ${end}（${hrs}hr）`],
+      ['費用',`NT$${cost.toLocaleString()}`],
+      ['Rider',notes],
+    ].filter(Boolean).map(([k,v])=>`<div class="detail-row"><span class="detail-key">${k}</span><span style="max-width:60%;text-align:right">${v}</span></div>`).join('');
     const links=[];
     if(gcal.link)  links.push(`<a class="ext-link" href="${gcal.link}" target="_blank">Google 日曆 →</a>`);
     if(notion.url) links.push(`<a class="ext-link" href="${notion.url}" target="_blank">Notion →</a>`);
@@ -355,6 +320,9 @@ async function fetchBookings() {
 
 document.getElementById('f-date').min = today;
 document.getElementById('f-date').value = today;
+document.getElementById('f-notes').addEventListener('input', function(){
+  if(this.value.trim()) this.classList.remove('required-empty');
+});
 renderCal();
 fetchBookings();
 </script>
