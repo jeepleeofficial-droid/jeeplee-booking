@@ -46,12 +46,13 @@ module.exports = async function handler(req, res) {
 
     if (req.method === 'POST') {
       const b = req.body;
+      const endDate = b.endDate || b.date; // 跨午夜時 endDate 為隔天
       const event = {
         summary: `【彩排室】${b.bandName}`,
         location: 'jeeplee 彩排室',
-        description: `聯絡人：${b.contact || '未填'}\n費用：NT$${b.cost}（${b.hours}hr × NT$180/hr）\n客戶類型：${b.clientType} 樂團類型：${b.bandType}\n預訂狀態：${b.bookingStatus} 付款狀態：${b.payStatus}\n備註：${b.notes || '無'}`,
+        description: `聯絡人：${b.contact || '未填'}\n費用：NT$${b.cost}（${b.hours}hr × NT$180/hr）\nRider：${b.notes || '無'}`,
         start: { dateTime: `${b.date}T${b.startTime}:00`, timeZone: 'Asia/Taipei' },
-        end:   { dateTime: `${b.date}T${b.endTime}:00`,   timeZone: 'Asia/Taipei' },
+        end:   { dateTime: `${endDate}T${b.endTime}:00`,  timeZone: 'Asia/Taipei' },
       };
       const r = await fetch(CALENDAR_BASE, {
         method: 'POST',
