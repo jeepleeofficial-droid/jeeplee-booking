@@ -69,6 +69,17 @@ input,textarea,select,button{font-family:inherit}
 .ext-link{color:#0060c0;font-size:13px;text-decoration:none}
 .ext-link:hover{text-decoration:underline}
 .required-mark{color:#e05c5c;margin-left:2px;font-size:12px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal-box{background:#fff;border-radius:12px;padding:2rem 2rem 1.5rem;max-width:320px;width:90%;text-align:center;transform:scale(.95);transition:transform .2s}
+.modal-overlay.show .modal-box{transform:scale(1)}
+.modal-icon{font-size:32px;margin-bottom:.75rem}
+.modal-title{font-size:17px;font-weight:600;margin-bottom:.4rem}
+.modal-msg{font-size:14px;color:#9b9b9b;line-height:1.6;margin-bottom:1.5rem}
+.modal-btn{padding:9px 28px;background:#1a1a1a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer}
+.modal-btn:hover{opacity:.8}
 </style>
 </head>
 <body>
@@ -81,6 +92,7 @@ input,textarea,select,button{font-family:inherit}
     <button class="tab" onclick="switchTab('book')">新增預訂</button>
   </div>
 
+  <!-- 日曆 -->
   <div id="view-cal">
     <div class="month-nav">
       <button class="month-btn" onclick="changeMonth(-1)">←</button>
@@ -98,6 +110,7 @@ input,textarea,select,button{font-family:inherit}
     </div>
   </div>
 
+  <!-- 新增預訂 -->
   <div id="view-book" style="display:none">
     <div id="err-area"></div>
     <div class="prop-row">
@@ -134,6 +147,7 @@ input,textarea,select,button{font-family:inherit}
     <div id="sync-area" style="margin-top:.6rem"></div>
   </div>
 
+  <!-- 成功 -->
   <div id="view-confirm" style="display:none">
     <div class="success">
       <div class="success-check">✓</div>
@@ -145,6 +159,16 @@ input,textarea,select,button{font-family:inherit}
         <button class="btn-dark" onclick="resetForm()">再新增一筆</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 衝突 Modal -->
+<div class="modal-overlay" id="conflict-modal">
+  <div class="modal-box">
+    <div class="modal-icon">⛔</div>
+    <div class="modal-title">此時段已有人預定</div>
+    <div class="modal-msg">您選擇的時段已被預定，<br>請重新選擇其他可用時段。</div>
+    <button class="modal-btn" onclick="closeModal()">重新選擇</button>
   </div>
 </div>
 
@@ -235,7 +259,12 @@ function resetForm() {
   switchTab('book');
 }
 
-function syncHTML(g,n) {
+function showModal(){ document.getElementById('conflict-modal').classList.add('show'); }
+function closeModal(){ document.getElementById('conflict-modal').classList.remove('show'); }
+// 點背景關閉
+document.getElementById('conflict-modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+
   const dot = s => `<span class="dot dot-${s}"></span>`;
   const lbl = s => s==='spin'?'同步中…':s==='ok'?'同步成功':'同步失敗';
   return `<div class="sync-row">${dot(g)} Google 日曆　${lbl(g)}</div><div class="sync-row">${dot(n)} Notion　${lbl(n)}</div>`;
@@ -262,18 +291,13 @@ async function handleSubmit() {
   }
 
   if(!band||!date||!start||!end){ ea.innerHTML='<div class="alert alert-err">請填寫所有必填欄位（樂團、日期、時間）</div>'; return; }
-  
-  // --- 新增：點擊建立時再次檢查時段衝突 ---
-  const hasConflict = bookings.some(b => overlap(b, {date, startTime: start, endTime: end}));
-  if (hasConflict) {
-    alert("❌ 此時段已有人預定，請選擇其他時間。");
-    ea.innerHTML = '<div class="alert alert-err">此時段已有人預定</div>';
-    return;
-  }
-  // ------------------------------------
-
   const hrs = (t2m(end)-t2m(start))/60;
   if(hrs<=0){ ea.innerHTML='<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
+
+  // 再次確認衝突（防止使用者繞過前端檢查直接送出）
+  const finalConflicts = date&&start&&end ? bookings.filter(b=>overlap(b,{date,startTime:start,endTime:end})) : [];
+  if(finalConflicts.length > 0){ showModal(); return; }
+
   ea.innerHTML='';
 
   const btn = document.getElementById('submit-btn');
