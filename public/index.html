@@ -9,7 +9,6 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#fff;color:#1a1a1a}
 input,textarea,select,button{font-family:inherit}
 .page{padding:2.5rem 2.5rem 4rem;max-width:680px;margin:0 auto}
-.page-icon{font-size:44px;margin-bottom:.6rem}
 .page-title{font-size:30px;font-weight:600;color:#1a1a1a;margin-bottom:.2rem}
 .page-sub{font-size:14px;color:#9b9b9b;margin-bottom:2rem}
 .tab-row{display:flex;border-bottom:1px solid #e8e8e8;margin-bottom:1.75rem}
@@ -22,9 +21,7 @@ input,textarea,select,button{font-family:inherit}
 .n-input{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;transition:background .12s}
 .n-input:hover,.n-input:focus{background:#f1f1ef}
 .n-input::placeholder{color:#ccc}
-.n-select{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;cursor:pointer;appearance:none;transition:background .12s}
-.n-select:hover,.n-select:focus{background:#f1f1ef}
-.section-head{font-size:11px;font-weight:500;color:#ccc;letter-spacing:.07em;text-transform:uppercase;padding:.9rem 0 .4rem;border-top:1px solid #f0f0f0;margin-top:.4rem}
+.n-input.required-empty{background:#fff5f5}
 .divider{height:1px;background:#f0f0f0;margin:1.25rem 0}
 .cost-box{background:#f7f7f5;border-radius:8px;padding:.7rem 1rem;display:flex;justify-content:space-between;align-items:center;margin:.9rem 0}
 .cost-label{font-size:13px;color:#9b9b9b}
@@ -54,16 +51,14 @@ input,textarea,select,button{font-family:inherit}
 .cal-day.selected{background:#f1f1ef}
 .day-num{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#9b9b9b;border-radius:50%}
 .cal-day.today .day-num{background:#1a1a1a;color:#fff}
-.dots{display:flex;justify-content:center;gap:2px;margin-top:2px}
-.cal-dot{width:5px;height:5px;border-radius:50%;background:#1a1a1a;opacity:.3}
+.booked-slot{font-size:10px;color:#9b9b9b;background:#f0f0f0;border-radius:3px;padding:1px 4px;margin-top:2px;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .day-detail{background:#f7f7f5;border-radius:10px;padding:1rem;margin-top:1rem}
 .detail-head{font-size:12px;color:#ccc;margin-bottom:.7rem}
-.b-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #ececec;align-items:stretch}
+.b-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #ececec;align-items:center}
 .b-item:last-child{border-bottom:none}
-.b-bar{width:3px;background:#1a1a1a;border-radius:2px;flex-shrink:0}
-.b-name{font-size:14px;font-weight:500}
-.b-meta{font-size:12px;color:#9b9b9b;margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
-.tag{background:#ececec;color:#666;border-radius:999px;padding:1px 8px;font-size:11px}
+.b-bar{width:3px;height:36px;background:#1a1a1a;border-radius:2px;flex-shrink:0}
+.b-time{font-size:14px;color:#1a1a1a}
+.b-status{font-size:12px;color:#9b9b9b;margin-top:2px}
 .empty{font-size:13px;color:#ccc;text-align:center;padding:1.2rem 0}
 .success{text-align:center;padding:3rem 0}
 .success-check{font-size:40px;margin-bottom:1rem}
@@ -73,11 +68,11 @@ input,textarea,select,button{font-family:inherit}
 .detail-key{color:#9b9b9b}
 .ext-link{color:#0060c0;font-size:13px;text-decoration:none}
 .ext-link:hover{text-decoration:underline}
+.required-mark{color:#e05c5c;margin-left:2px;font-size:12px}
 </style>
 </head>
 <body>
 <div class="page">
-  <div class="page-icon">🎸</div>
   <div class="page-title">彩排室預訂</div>
   <div class="page-sub">jeeplee 彩排室 · NT$180 / hr</div>
 
@@ -127,52 +122,16 @@ input,textarea,select,button{font-family:inherit}
       <span class="prop-label">結束時間</span>
       <input class="n-input prop-value" id="f-end" type="time" value="12:00" step="1800" />
     </div>
-
-    <div class="section-head">分類</div>
-
-    <div class="prop-row">
-      <span class="prop-label">客戶類型</span>
-      <select class="n-select prop-value" id="f-client">
-        <option value="新客">新客</option>
-        <option value="老客">老客</option>
-        <option value="VIP">VIP</option>
-      </select>
-    </div>
-    <div class="prop-row">
-      <span class="prop-label">樂團類型</span>
-      <select class="n-select prop-value" id="f-btype">
-        <option value="樂團">樂團</option>
-        <option value="個人">個人</option>
-        <option value="錄音">錄音</option>
-        <option value="其他">其他</option>
-      </select>
-    </div>
-    <div class="prop-row">
-      <span class="prop-label">預訂狀態</span>
-      <select class="n-select prop-value" id="f-bstatus">
-        <option value="已確認">已確認</option>
-        <option value="待確認">待確認</option>
-      </select>
-    </div>
-    <div class="prop-row">
-      <span class="prop-label">付款狀態</span>
-      <select class="n-select prop-value" id="f-pstatus">
-        <option value="未付款">未付款</option>
-        <option value="已付款">已付款</option>
-        <option value="待確認">待確認</option>
-      </select>
-    </div>
     <div class="prop-row" style="align-items:flex-start">
-      <span class="prop-label" style="padding-top:6px">備註</span>
-      <textarea class="n-input prop-value" id="f-notes" rows="3" placeholder="人數、設備需求…" style="resize:vertical;line-height:1.55"></textarea>
+      <span class="prop-label" style="padding-top:6px">Rider<span class="required-mark">*</span></span>
+      <textarea class="n-input prop-value" id="f-notes" rows="4" placeholder="請輸入 Rider 需求（樂器、設備、人數等）…" style="resize:vertical;line-height:1.55"></textarea>
     </div>
 
     <div class="divider"></div>
     <div id="cost-area"></div>
     <div id="conflict-area"></div>
-    <div style="display:flex;gap:10px;align-items:center;margin-top:.6rem;flex-wrap:wrap">
+    <div style="display:flex;gap:10px;align-items:center;margin-top:.6rem">
       <button class="btn-dark" id="submit-btn" onclick="handleSubmit()">建立預訂</button>
-      <span style="font-size:12px;color:#ccc">→ 同步 Google 日曆 ＋ Notion</span>
     </div>
     <div id="sync-area" style="margin-top:.6rem"></div>
   </div>
@@ -227,7 +186,9 @@ function renderCal() {
     const bks = bookings.filter(b=>b.date===ds);
     const el = document.createElement('div');
     el.className = 'cal-day'+(ds===today?' today':'')+(ds===selDate?' selected':'');
-    el.innerHTML = `<div class="day-num">${d}</div><div class="dots">${bks.slice(0,3).map(()=>'<div class="cal-dot"></div>').join('')}</div>`;
+    const slots = bks.slice(0,2).map(b=>`<div class="booked-slot">${b.startTime}–${b.endTime} 已預定</div>`).join('');
+    const more = bks.length>2 ? `<div class="booked-slot">+${bks.length-2} 筆</div>` : '';
+    el.innerHTML = `<div class="day-num">${d}</div>${slots}${more}`;
     el.onclick = () => { selDate=ds; renderCal(); renderDetail(); };
     body.appendChild(el);
   }
@@ -241,8 +202,11 @@ function renderDetail() {
   if(!bks.length){ list.innerHTML='<div class="empty">此日尚無預訂</div>'; return; }
   list.innerHTML = bks.map(b => {
     const hrs = ((t2m(b.endTime)-t2m(b.startTime))/60).toFixed(1);
-    const tags = [b.clientType,b.bandType,b.bookingStatus].filter(Boolean).map(t=>`<span class="tag">${t}</span>`).join('');
-    return `<div class="b-item"><div class="b-bar"></div><div style="flex:1"><div class="b-name">${b.bandName}</div><div class="b-meta"><span>${b.startTime}–${b.endTime} · ${hrs}hr</span>${tags}</div></div></div>`;
+    return `<div class="b-item">
+      <div class="b-bar"></div>
+      <div><div class="b-time">${b.startTime} – ${b.endTime}</div>
+      <div class="b-status">已預定 · ${hrs}hr</div></div>
+    </div>`;
   }).join('');
 }
 
@@ -259,7 +223,7 @@ function updateCost() {
     ? `<div class="cost-box"><span class="cost-label">${hrs} 小時 × NT$${RATE}/hr</span><span class="cost-value">NT$${cost.toLocaleString()}</span></div>` : '';
   const conflicts = d&&s&&e ? bookings.filter(b=>overlap(b,{date:d,startTime:s,endTime:e})) : [];
   document.getElementById('conflict-area').innerHTML = conflicts.length
-    ? `<div class="alert alert-warn">時段衝突：${conflicts.map(c=>`${c.bandName} (${c.startTime}–${c.endTime})`).join('、')}</div>` : '';
+    ? `<div class="alert alert-warn">該時段已滿額，請選擇其他時間</div>` : '';
   document.getElementById('submit-btn').disabled = conflicts.length>0;
 }
 
@@ -268,11 +232,8 @@ function resetForm() {
   document.getElementById('f-start').value='10:00';
   document.getElementById('f-end').value='12:00';
   document.getElementById('f-date').value=today;
-  document.getElementById('f-client').value='新客';
-  document.getElementById('f-btype').value='樂團';
-  document.getElementById('f-bstatus').value='已確認';
-  document.getElementById('f-pstatus').value='未付款';
   ['err-area','cost-area','conflict-area','sync-area'].forEach(id=>document.getElementById(id).innerHTML='');
+  document.getElementById('f-notes').classList.remove('required-empty');
   document.getElementById('submit-btn').disabled=false;
   switchTab('book');
 }
@@ -290,12 +251,19 @@ async function handleSubmit() {
   const start   = document.getElementById('f-start').value;
   const end     = document.getElementById('f-end').value;
   const notes   = document.getElementById('f-notes').value.trim();
-  const clientType    = document.getElementById('f-client').value;
-  const bandType      = document.getElementById('f-btype').value;
-  const bookingStatus = document.getElementById('f-bstatus').value;
-  const payStatus     = document.getElementById('f-pstatus').value;
-
   const ea = document.getElementById('err-area');
+  const riderEl = document.getElementById('f-notes');
+
+  // Rider 必填驗證
+  if(!notes) {
+    riderEl.classList.add('required-empty');
+    riderEl.focus();
+    ea.innerHTML='<div class="alert alert-err">請填寫 Rider 需求</div>';
+    return;
+  } else {
+    riderEl.classList.remove('required-empty');
+  }
+
   if(!band||!date||!start||!end){ ea.innerHTML='<div class="alert alert-err">請填寫所有必填欄位（樂團、日期、時間）</div>'; return; }
   const hrs = (t2m(end)-t2m(start))/60;
   if(hrs<=0){ ea.innerHTML='<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
@@ -304,7 +272,8 @@ async function handleSubmit() {
   const btn = document.getElementById('submit-btn');
   btn.disabled=true; btn.textContent='建立中…';
   const cost = Math.round(hrs*RATE);
-  const payload = { bandName:band, contact, date, startTime:start, endTime:end, hours:hrs, cost, clientType, bandType, bookingStatus, payStatus, notes };
+  const payload = { bandName:band, contact, date, startTime:start, endTime:end, hours:hrs, cost,
+    clientType:'新客', bandType:'樂團', bookingStatus:'已確認', payStatus:'未付款', notes };
 
   document.getElementById('sync-area').innerHTML = syncHTML('spin','spin');
 
@@ -319,14 +288,14 @@ async function handleSubmit() {
   document.getElementById('sync-area').innerHTML = syncHTML(gcal.ok?'ok':'err', notion.ok?'ok':'err');
 
   if(gcal.ok || notion.ok) {
-    bookings.push({id:Date.now()+'', bandName:band, date, startTime:start, endTime:end, clientType, bandType, bookingStatus});
+    bookings.push({id:Date.now()+'', bandName:band, date, startTime:start, endTime:end});
     const cd = document.getElementById('confirm-detail');
     cd.innerHTML = [
-      ['樂團',band],['日期',date],['時段',`${start} – ${end}（${hrs}hr）`],
-      ['費用',`NT$${cost.toLocaleString()}`],['客戶類型',clientType],
-      ['樂團類型',bandType],['預訂狀態',bookingStatus],['付款狀態',payStatus],
-      notes&&['備註',notes],
-    ].filter(Boolean).map(([k,v])=>`<div class="detail-row"><span class="detail-key">${k}</span><span>${v}</span></div>`).join('');
+      ['樂團',band],['日期',date],
+      ['時段',`${start} – ${end}（${hrs}hr）`],
+      ['費用',`NT$${cost.toLocaleString()}`],
+      ['Rider',notes],
+    ].filter(Boolean).map(([k,v])=>`<div class="detail-row"><span class="detail-key">${k}</span><span style="max-width:60%;text-align:right">${v}</span></div>`).join('');
     const links=[];
     if(gcal.link)  links.push(`<a class="ext-link" href="${gcal.link}" target="_blank">Google 日曆 →</a>`);
     if(notion.url) links.push(`<a class="ext-link" href="${notion.url}" target="_blank">Notion →</a>`);
@@ -351,6 +320,9 @@ async function fetchBookings() {
 
 document.getElementById('f-date').min = today;
 document.getElementById('f-date').value = today;
+document.getElementById('f-notes').addEventListener('input', function(){
+  if(this.value.trim()) this.classList.remove('required-empty');
+});
 renderCal();
 fetchBookings();
 </script>
