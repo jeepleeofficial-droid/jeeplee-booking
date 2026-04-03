@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>彩排室預訂 · jeeplee</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#fff;color:#1a1a1a}
+input,textarea,select,button{font-family:inherit}
+.page{padding:2.5rem 2.5rem 4rem;max-width:680px;margin:0 auto}
+.page-icon{font-size:44px;margin-bottom:.6rem}
+.page-title{font-size:30px;font-weight:600;color:#1a1a1a;margin-bottom:.2rem}
+.page-sub{font-size:14px;color:#9b9b9b;margin-bottom:2rem}
+.tab-row{display:flex;border-bottom:1px solid #e8e8e8;margin-bottom:1.75rem}
+.tab{padding:8px 18px;font-size:14px;cursor:pointer;color:#9b9b9b;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.active{color:#1a1a1a;font-weight:500;border-bottom-color:#1a1a1a}
+.tab:hover:not(.active){color:#555}
+.prop-row{display:flex;align-items:baseline;min-height:34px;padding:3px 0}
+.prop-label{font-size:14px;color:#9b9b9b;width:130px;flex-shrink:0;padding-top:4px}
+.prop-value{flex:1}
+.n-input{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;transition:background .12s}
+.n-input:hover,.n-input:focus{background:#f1f1ef}
+.n-input::placeholder{color:#ccc}
+.n-select{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;cursor:pointer;appearance:none;transition:background .12s}
+.n-select:hover,.n-select:focus{background:#f1f1ef}
+.section-head{font-size:11px;font-weight:500;color:#ccc;letter-spacing:.07em;text-transform:uppercase;padding:.9rem 0 .4rem;border-top:1px solid #f0f0f0;margin-top:.4rem}
+.divider{height:1px;background:#f0f0f0;margin:1.25rem 0}
+.cost-box{background:#f7f7f5;border-radius:8px;padding:.7rem 1rem;display:flex;justify-content:space-between;align-items:center;margin:.9rem 0}
+.cost-label{font-size:13px;color:#9b9b9b}
+.cost-value{font-size:20px;font-weight:600;color:#1a1a1a}
+.alert{border-radius:0 7px 7px 0;padding:.55rem .9rem;margin:.6rem 0;font-size:13px;line-height:1.5}
+.alert-warn{background:#fffbf0;border-left:3px solid #f0c040;color:#9a7000}
+.alert-err{background:#fff2f2;border-left:3px solid #e05c5c;color:#b03030}
+.sync-row{display:flex;align-items:center;gap:7px;font-size:13px;color:#9b9b9b;margin:.3rem 0}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-ok{background:#52b76b}
+.dot-err{background:#e05c5c}
+.dot-spin{background:#ddd;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+.btn-dark{padding:8px 18px;background:#1a1a1a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.btn-dark:hover{opacity:.8}
+.btn-dark:disabled{opacity:.3;cursor:not-allowed}
+.btn-outline{padding:8px 16px;background:none;border:1px solid #d8d8d8;border-radius:7px;font-size:13px;color:#555;cursor:pointer;transition:background .12s}
+.btn-outline:hover{background:#f7f7f5}
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.month-btn{background:none;border:none;cursor:pointer;color:#9b9b9b;font-size:18px;padding:3px 10px;border-radius:5px}
+.month-btn:hover{background:#f1f1ef}
+.month-label{font-size:15px;font-weight:500}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-head{text-align:center;font-size:11px;color:#ccc;padding:4px 0;font-weight:500}
+.cal-day{min-height:54px;padding:5px 4px;border-radius:6px;cursor:pointer;transition:background .1s}
+.cal-day:hover{background:#f7f7f5}
+.cal-day.selected{background:#f1f1ef}
+.day-num{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#9b9b9b;border-radius:50%}
+.cal-day.today .day-num{background:#1a1a1a;color:#fff}
+.dots{display:flex;justify-content:center;gap:2px;margin-top:2px}
+.cal-dot{width:5px;height:5px;border-radius:50%;background:#1a1a1a;opacity:.3}
+.day-detail{background:#f7f7f5;border-radius:10px;padding:1rem;margin-top:1rem}
+.detail-head{font-size:12px;color:#ccc;margin-bottom:.7rem}
+.b-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #ececec;align-items:stretch}
+.b-item:last-child{border-bottom:none}
+.b-bar{width:3px;background:#1a1a1a;border-radius:2px;flex-shrink:0}
+.b-name{font-size:14px;font-weight:500}
+.b-meta{font-size:12px;color:#9b9b9b;margin-top:2px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{background:#ececec;color:#666;border-radius:999px;padding:1px 8px;font-size:11px}
+.empty{font-size:13px;color:#ccc;text-align:center;padding:1.2rem 0}
+.success{text-align:center;padding:3rem 0}
+.success-check{font-size:40px;margin-bottom:1rem}
+.success-title{font-size:22px;font-weight:600;margin-bottom:.25rem}
+.success-sub{font-size:14px;color:#9b9b9b;margin-bottom:2rem}
+.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.detail-key{color:#9b9b9b}
+.ext-link{color:#0060c0;font-size:13px;text-decoration:none}
+.ext-link:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-icon">🎸</div>
+  <div class="page-title">彩排室預訂</div>
+  <div class="page-sub">jeeplee 彩排室 · NT$180 / hr</div>
+
+  <div class="tab-row">
+    <button class="tab active" onclick="switchTab('cal')">日曆</button>
+    <button class="tab" onclick="switchTab('book')">新增預訂</button>
+  </div>
+
+  <!-- 日曆 -->
+  <div id="view-cal">
+    <div class="month-nav">
+      <button class="month-btn" onclick="changeMonth(-1)">←</button>
+      <span class="month-label" id="month-label"></span>
+      <button class="month-btn" onclick="changeMonth(1)">→</button>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-head">日</div><div class="cal-head">一</div><div class="cal-head">二</div>
+      <div class="cal-head">三</div><div class="cal-head">四</div><div class="cal-head">五</div><div class="cal-head">六</div>
+    </div>
+    <div class="cal-grid" id="cal-body" style="margin-top:2px"></div>
+    <div class="day-detail">
+      <div class="detail-head" id="detail-date"></div>
+      <div id="detail-list"></div>
+    </div>
+  </div>
+
+  <!-- 新增預訂 -->
+  <div id="view-book" style="display:none">
+    <div id="err-area"></div>
+    <div class="prop-row">
+      <span class="prop-label">樂團 / 藝人</span>
+      <input class="n-input prop-value" id="f-band" placeholder="輸入名稱…" />
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">聯絡人</span>
+      <input class="n-input prop-value" id="f-contact" placeholder="姓名、電話或 Line…" />
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">日期</span>
+      <input class="n-input prop-value" id="f-date" type="date" />
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">開始時間</span>
+      <input class="n-input prop-value" id="f-start" type="time" value="10:00" step="1800" />
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">結束時間</span>
+      <input class="n-input prop-value" id="f-end" type="time" value="12:00" step="1800" />
+    </div>
+
+    <div class="section-head">分類</div>
+
+    <div class="prop-row">
+      <span class="prop-label">客戶類型</span>
+      <select class="n-select prop-value" id="f-client">
+        <option value="新客">新客</option>
+        <option value="老客">老客</option>
+        <option value="VIP">VIP</option>
+      </select>
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">樂團類型</span>
+      <select class="n-select prop-value" id="f-btype">
+        <option value="樂團">樂團</option>
+        <option value="個人">個人</option>
+        <option value="錄音">錄音</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">預訂狀態</span>
+      <select class="n-select prop-value" id="f-bstatus">
+        <option value="已確認">已確認</option>
+        <option value="待確認">待確認</option>
+      </select>
+    </div>
+    <div class="prop-row">
+      <span class="prop-label">付款狀態</span>
+      <select class="n-select prop-value" id="f-pstatus">
+        <option value="未付款">未付款</option>
+        <option value="已付款">已付款</option>
+        <option value="待確認">待確認</option>
+      </select>
+    </div>
+    <div class="prop-row" style="align-items:flex-start">
+      <span class="prop-label" style="padding-top:6px">備註</span>
+      <textarea class="n-input prop-value" id="f-notes" rows="3" placeholder="人數、設備需求…" style="resize:vertical;line-height:1.55"></textarea>
+    </div>
+
+    <div class="divider"></div>
+    <div id="cost-area"></div>
+    <div id="conflict-area"></div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:.6rem;flex-wrap:wrap">
+      <button class="btn-dark" id="submit-btn" onclick="handleSubmit()">建立預訂</button>
+      <span style="font-size:12px;color:#ccc">→ 同步 Google 日曆 ＋ Notion</span>
+    </div>
+    <div id="sync-area" style="margin-top:.6rem"></div>
+  </div>
+
+  <!-- 成功 -->
+  <div id="view-confirm" style="display:none">
+    <div class="success">
+      <div class="success-check">✓</div>
+      <div class="success-title">預訂已建立</div>
+      <div class="success-sub" id="confirm-sub"></div>
+      <div id="confirm-detail" style="text-align:left;margin-bottom:1.75rem"></div>
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button class="btn-outline" onclick="switchTab('cal')">查看日曆</button>
+        <button class="btn-dark" onclick="resetForm()">再新增一筆</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RATE = 180;
+let bookings = [];
+let selDate = new Date().toISOString().slice(0,10);
+let cy = new Date().getFullYear();
+let cm = new Date().getMonth();
+const today = new Date().toISOString().slice(0,10);
+
+const t2m = t => { const[h,m]=t.split(':').map(Number); return h*60+m; };
+const overlap = (a,b) => a.date===b.date && t2m(a.startTime)<t2m(b.endTime) && t2m(b.startTime)<t2m(a.endTime);
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((el,i) =>
+    el.classList.toggle('active', ['cal','book'][i]===tab));
+  ['cal','book','confirm'].forEach(v =>
+    document.getElementById('view-'+v).style.display = v===tab?'':'none');
+  if(tab==='cal') renderCal();
+}
+
+function changeMonth(d) {
+  const dt = new Date(cy, cm+d); cy=dt.getFullYear(); cm=dt.getMonth(); renderCal();
+}
+
+function renderCal() {
+  document.getElementById('month-label').textContent = `${cy} 年 ${cm+1} 月`;
+  const first = new Date(cy,cm,1).getDay();
+  const days  = new Date(cy,cm+1,0).getDate();
+  const body  = document.getElementById('cal-body');
+  body.innerHTML = '';
+  for(let i=0;i<first;i++) body.appendChild(document.createElement('div'));
+  for(let d=1;d<=days;d++){
+    const ds = `${cy}-${String(cm+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const bks = bookings.filter(b=>b.date===ds);
+    const el = document.createElement('div');
+    el.className = 'cal-day'+(ds===today?' today':'')+(ds===selDate?' selected':'');
+    el.innerHTML = `<div class="day-num">${d}</div><div class="dots">${bks.slice(0,3).map(()=>'<div class="cal-dot"></div>').join('')}</div>`;
+    el.onclick = () => { selDate=ds; renderCal(); renderDetail(); };
+    body.appendChild(el);
+  }
+  renderDetail();
+}
+
+function renderDetail() {
+  document.getElementById('detail-date').textContent = selDate;
+  const bks = bookings.filter(b=>b.date===selDate);
+  const list = document.getElementById('detail-list');
+  if(!bks.length){ list.innerHTML='<div class="empty">此日尚無預訂</div>'; return; }
+  list.innerHTML = bks.map(b => {
+    const hrs = ((t2m(b.endTime)-t2m(b.startTime))/60).toFixed(1);
+    const tags = [b.clientType,b.bandType,b.bookingStatus].filter(Boolean).map(t=>`<span class="tag">${t}</span>`).join('');
+    return `<div class="b-item"><div class="b-bar"></div><div style="flex:1"><div class="b-name">${b.bandName}</div><div class="b-meta"><span>${b.startTime}–${b.endTime} · ${hrs}hr</span>${tags}</div></div></div>`;
+  }).join('');
+}
+
+['f-start','f-end','f-date'].forEach(id =>
+  document.getElementById(id).addEventListener('input', updateCost));
+
+function updateCost() {
+  const s=document.getElementById('f-start').value;
+  const e=document.getElementById('f-end').value;
+  const d=document.getElementById('f-date').value;
+  const hrs = s&&e ? Math.max(0,(t2m(e)-t2m(s))/60) : 0;
+  const cost = Math.round(hrs*RATE);
+  document.getElementById('cost-area').innerHTML = hrs>0
+    ? `<div class="cost-box"><span class="cost-label">${hrs} 小時 × NT$${RATE}/hr</span><span class="cost-value">NT$${cost.toLocaleString()}</span></div>` : '';
+  const conflicts = d&&s&&e ? bookings.filter(b=>overlap(b,{date:d,startTime:s,endTime:e})) : [];
+  document.getElementById('conflict-area').innerHTML = conflicts.length
+    ? `<div class="alert alert-warn">時段衝突：${conflicts.map(c=>`${c.bandName} (${c.startTime}–${c.endTime})`).join('、')}</div>` : '';
+  document.getElementById('submit-btn').disabled = conflicts.length>0;
+}
+
+function resetForm() {
+  ['f-band','f-contact','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-start').value='10:00';
+  document.getElementById('f-end').value='12:00';
+  document.getElementById('f-date').value=today;
+  document.getElementById('f-client').value='新客';
+  document.getElementById('f-btype').value='樂團';
+  document.getElementById('f-bstatus').value='已確認';
+  document.getElementById('f-pstatus').value='未付款';
+  ['err-area','cost-area','conflict-area','sync-area'].forEach(id=>document.getElementById(id).innerHTML='');
+  document.getElementById('submit-btn').disabled=false;
+  switchTab('book');
+}
+
+function syncHTML(g,n) {
+  const dot = s => `<span class="dot dot-${s}"></span>`;
+  const lbl = s => s==='spin'?'同步中…':s==='ok'?'同步成功':'同步失敗';
+  return `<div class="sync-row">${dot(g)} Google 日曆　${lbl(g)}</div><div class="sync-row">${dot(n)} Notion　${lbl(n)}</div>`;
+}
+
+async function handleSubmit() {
+  const band    = document.getElementById('f-band').value.trim();
+  const contact = document.getElementById('f-contact').value.trim();
+  const date    = document.getElementById('f-date').value;
+  const start   = document.getElementById('f-start').value;
+  const end     = document.getElementById('f-end').value;
+  const notes   = document.getElementById('f-notes').value.trim();
+  const clientType    = document.getElementById('f-client').value;
+  const bandType      = document.getElementById('f-btype').value;
+  const bookingStatus = document.getElementById('f-bstatus').value;
+  const payStatus     = document.getElementById('f-pstatus').value;
+
+  const ea = document.getElementById('err-area');
+  if(!band||!date||!start||!end){ ea.innerHTML='<div class="alert alert-err">請填寫所有必填欄位（樂團、日期、時間）</div>'; return; }
+  const hrs = (t2m(end)-t2m(start))/60;
+  if(hrs<=0){ ea.innerHTML='<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
+  ea.innerHTML='';
+
+  const btn = document.getElementById('submit-btn');
+  btn.disabled=true; btn.textContent='建立中…';
+  const cost = Math.round(hrs*RATE);
+  const payload = { bandName:band, contact, date, startTime:start, endTime:end, hours:hrs, cost, clientType, bandType, bookingStatus, payStatus, notes };
+
+  document.getElementById('sync-area').innerHTML = syncHTML('spin','spin');
+
+  const [gcalRes, notionRes] = await Promise.allSettled([
+    fetch('/api/google-calendar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }).then(r=>r.json()),
+    fetch('/api/notion',          { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }).then(r=>r.json()),
+  ]);
+
+  const gcal   = gcalRes.status==='fulfilled'   ? gcalRes.value   : {ok:false};
+  const notion = notionRes.status==='fulfilled' ? notionRes.value : {ok:false};
+
+  document.getElementById('sync-area').innerHTML = syncHTML(gcal.ok?'ok':'err', notion.ok?'ok':'err');
+
+  if(gcal.ok || notion.ok) {
+    bookings.push({id:Date.now()+'', bandName:band, date, startTime:start, endTime:end, clientType, bandType, bookingStatus});
+    const cd = document.getElementById('confirm-detail');
+    cd.innerHTML = [
+      ['樂團',band],['日期',date],['時段',`${start} – ${end}（${hrs}hr）`],
+      ['費用',`NT$${cost.toLocaleString()}`],['客戶類型',clientType],
+      ['樂團類型',bandType],['預訂狀態',bookingStatus],['付款狀態',payStatus],
+      notes&&['備註',notes],
+    ].filter(Boolean).map(([k,v])=>`<div class="detail-row"><span class="detail-key">${k}</span><span>${v}</span></div>`).join('');
+    const links=[];
+    if(gcal.link)  links.push(`<a class="ext-link" href="${gcal.link}" target="_blank">Google 日曆 →</a>`);
+    if(notion.url) links.push(`<a class="ext-link" href="${notion.url}" target="_blank">Notion →</a>`);
+    if(links.length) cd.innerHTML+=`<div style="margin-top:.8rem;display:flex;gap:1.2rem">${links.join('')}</div>`;
+    document.getElementById('confirm-sub').textContent = `已同步至 ${[gcal.ok&&'Google 日曆',notion.ok&&'Notion'].filter(Boolean).join(' 與 ')}`;
+    ['cal','book','confirm'].forEach(v=>document.getElementById('view-'+v).style.display=v==='confirm'?'':'none');
+    document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  } else {
+    ea.innerHTML='<div class="alert alert-err">同步失敗，請稍後再試</div>';
+    btn.disabled=false; btn.textContent='建立預訂';
+  }
+}
+
+async function fetchBookings() {
+  try {
+    const r = await fetch('/api/google-calendar');
+    const d = await r.json();
+    if(d.ok && Array.isArray(d.bookings)) bookings = d.bookings;
+  } catch(_) {}
+  renderCal();
+}
+
+document.getElementById('f-date').min = today;
+document.getElementById('f-date').value = today;
+renderCal();
+fetchBookings();
+</script>
+</body>
+</html>
