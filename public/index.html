@@ -103,7 +103,7 @@ input,textarea,select,button{font-family:inherit}
 <body>
 <div class="page">
   <div class="page-title">彩排室預訂</div>
-  <div class="page-sub">Jeeplee 彩排室 </div>
+  <div class="page-sub">Jeeplee 彩排室</div>
 
   <div class="tab-row">
     <button class="tab active" onclick="switchTab('cal')">日曆</button>
@@ -153,15 +153,15 @@ input,textarea,select,button{font-family:inherit}
 
     <div id="err-area"></div>
     <div class="prop-row">
-      <span class="prop-label">樂團 / 藝人</span>
+      <span class="prop-label">樂團 / 藝人<span class="required-mark">*</span></span>
       <input class="n-input prop-value" id="f-band" placeholder="輸入名稱…" />
     </div>
     <div class="prop-row">
-      <span class="prop-label">聯絡人</span>
+      <span class="prop-label">聯絡人<span class="required-mark">*</span></span>
       <input class="n-input prop-value" id="f-contact" placeholder="姓名…" />
     </div>
     <div class="prop-row">
-      <span class="prop-label">聯絡方式</span>
+      <span class="prop-label">聯絡方式<span class="required-mark">*</span></span>
       <input class="n-input prop-value" id="f-contact-method" placeholder="電話或 Line ID…" />
     </div>
     <div class="prop-row">
@@ -449,24 +449,48 @@ function syncHTML(g, n) {
 
 // ── 送出預訂 ──────────────────────────────────
 function handleSubmit() {
-  var band    = document.getElementById('f-band').value.trim();
-  var contact = document.getElementById('f-contact').value.trim();
+  var band          = document.getElementById('f-band').value.trim();
+  var contact       = document.getElementById('f-contact').value.trim();
   var contactMethod = document.getElementById('f-contact-method').value.trim();
-  var date    = document.getElementById('f-date').value;
-  var notes   = document.getElementById('f-notes').value.trim();
-  var ea      = document.getElementById('err-area');
-  var riderEl = document.getElementById('f-notes');
-  var startMins = slotToMins(startSlot);
-  var endMins   = slotToMins(endSlot);
+  var date          = document.getElementById('f-date').value;
+  var notes         = document.getElementById('f-notes').value.trim();
+  var ea            = document.getElementById('err-area');
+  var startMins     = slotToMins(startSlot);
+  var endMins       = slotToMins(endSlot);
 
-  if (!notes) {
-    riderEl.classList.add('required-empty'); riderEl.focus();
-    ea.innerHTML = '<div class="alert alert-err">請填寫 Rider 需求</div>'; return;
+  // 必填驗證：所有欄位
+  var missing = [];
+  if (!band)          missing.push('樂團 / 藝人');
+  if (!contact)       missing.push('聯絡人');
+  if (!contactMethod) missing.push('聯絡方式');
+  if (!date)          missing.push('日期');
+  if (!notes)         missing.push('Rider');
+
+  if (missing.length > 0) {
+    // 標記空白欄位
+    var fieldMap = {
+      'f-band':           band,
+      'f-contact':        contact,
+      'f-contact-method': contactMethod,
+      'f-notes':          notes,
+    };
+    Object.keys(fieldMap).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!fieldMap[id]) {
+        el.classList.add('required-empty');
+      } else {
+        el.classList.remove('required-empty');
+      }
+    });
+    ea.innerHTML = '<div class="alert alert-err">請填寫所有必填欄位：' + missing.join('、') + '</div>';
+    return;
   }
-  riderEl.classList.remove('required-empty');
-  if (!band || !date) {
-    ea.innerHTML = '<div class="alert alert-err">請填寫所有必填欄位（樂團、日期）</div>'; return;
-  }
+
+  // 清除所有紅框
+  ['f-band','f-contact','f-contact-method','f-notes'].forEach(function(id) {
+    document.getElementById(id).classList.remove('required-empty');
+  });
+  ea.innerHTML = '';
   var hrs = (endMins - startMins) / 60;
   if (hrs <= 0) {
     ea.innerHTML = '<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return;
@@ -533,8 +557,10 @@ function fetchBookings() {
 
 // ── 事件監聽 ──────────────────────────────────
 document.getElementById('f-date').addEventListener('change', checkConflict);
-document.getElementById('f-notes').addEventListener('input', function(){
-  if (this.value.trim()) this.classList.remove('required-empty');
+['f-band','f-contact','f-contact-method','f-notes'].forEach(function(id) {
+  document.getElementById(id).addEventListener('input', function() {
+    if (this.value.trim()) this.classList.remove('required-empty');
+  });
 });
 
 // ── 初始化 ────────────────────────────────────
