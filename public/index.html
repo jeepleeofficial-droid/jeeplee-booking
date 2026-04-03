@@ -127,11 +127,14 @@ input,textarea,select,button{font-family:inherit}
     </div>
     <div class="prop-row">
       <span class="prop-label">開始時間</span>
-      <input class="n-input prop-value" id="f-start" type="time" value="10:00" step="1800" />
+      <select class="n-select prop-value" id="f-start"></select>
     </div>
     <div class="prop-row">
       <span class="prop-label">結束時間</span>
-      <input class="n-input prop-value" id="f-end" type="time" value="12:00" step="1800" />
+      <select class="n-select prop-value" id="f-end"></select>
+    </div>
+    <div id="midnight-note" style="font-size:12px;color:#9b9b9b;padding:2px 0 4px 130px;display:none">
+      結束時間為隔天
     </div>
     <div class="prop-row" style="align-items:flex-start">
       <span class="prop-label" style="padding-top:6px">Rider<span class="required-mark">*</span></span>
@@ -180,8 +183,83 @@ let cy = new Date().getFullYear();
 let cm = new Date().getMonth();
 const today = new Date().toISOString().slice(0,10);
 
+// 建立 24hr 時間選項（每30分鐘一格，00:00 ~ 29:30，支援到隔天05:30）
+function buildTimeOptions() {
+  const opts = [];
+  // 當天 00:00 ~ 23:30
+  for(let h=0;h<24;h++){
+    for(let m=0;m<60;m+=30){
+      const label = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      opts.push({value: h*60+m, label});
+    }
+  }
+  // 隔天 00:00 ~ 05:30（顯示為 24:00 ~ 29:30）
+  for(let h=0;h<6;h++){
+    for(let m=0;m<60;m+=30){
+      const displayH = h+24;
+      const label = `${String(displayH).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+      opts.push({value: (h+24)*60+m, label});
+    }
+  }
+  return opts;
+}
+
+const TIME_OPTS = buildTimeOptions();
+
+function populateTimeSelects() {
+  ['f-start','f-end'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = TIME_OPTS.map(o =>
+      `<option value="${o.value}">${o.label}</option>`
+    ).join('');
+  });
+  document.getElementById('f-start').value = 600;  // 10:00
+  document.getElementById('f-end').value   = 720;  // 12:00
+}
+
+// 把分鐘數轉成 HH:MM 字串（給 Google Calendar 用，隔天自動 +1 日）
+function minsToTime(mins) {
+  const h = Math.floor(mins / 60) % 24;
+  const m = mins % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+// 取得結束日期（如果超過 24:00 就是隔天）
+function getEndDate(baseDate, endMins) {
+  if(endMins >= 1440) { // 超過午夜
+    const d = new Date(baseDate);
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0,10);
+  }
+  return baseDate;
+}
+
 const t2m = t => { const[h,m]=t.split(':').map(Number); return h*60+m; };
-const overlap = (a,b) => a.date===b.date && t2m(a.startTime)<t2m(b.endTime) && t2m(b.startTime)<t2m(a.endTime);
+
+// 衝突偵測（支援跨日）
+function overlapMins(a, startMins, endMins, date) {
+  // 把 booking 的時間轉成分鐘數（從當天 00:00 算起）
+  const aStart = t2m(a.startTime);
+  let aEnd = t2m(a.endTime);
+  // 如果結束比開始早，代表跨午夜
+  if(aEnd <= aStart) aEnd += 1440;
+
+  if(a.date === date) {
+    // 同一天開始的預訂
+    return startMins < aEnd && aStart < endMins;
+  } else {
+    // 檢查隔天的情況：endMins >= 1440 表示跨午夜
+    const prevDate = new Date(date);
+    prevDate.setDate(prevDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().slice(0,10);
+    if(a.date === prevDateStr && endMins >= 1440) {
+      // 前一天有跨夜的預訂，和我們的開始時間可能衝突
+      return (startMins + 1440) < aEnd && aStart < endMins;
+    }
+  }
+  return false;
+}
+
 
 function switchTab(tab) {
   document.querySelectorAll('.tab').forEach((el,i) =>
@@ -232,27 +310,36 @@ function renderDetail() {
 }
 
 ['f-start','f-end','f-date'].forEach(id =>
-  document.getElementById(id).addEventListener('input', updateCost));
+  document.getElementById(id).addEventListener('change', updateCost));
 
 function updateCost() {
-  const s=document.getElementById('f-start').value;
-  const e=document.getElementById('f-end').value;
-  const d=document.getElementById('f-date').value;
-  const hrs = s&&e ? Math.max(0,(t2m(e)-t2m(s))/60) : 0;
-  const cost = Math.round(hrs*RATE);
-  document.getElementById('cost-area').innerHTML = hrs>0
+  const startMins = parseInt(document.getElementById('f-start').value);
+  const endMins   = parseInt(document.getElementById('f-end').value);
+  const d = document.getElementById('f-date').value;
+
+  // 結束必須比開始晚（允許跨午夜，endMins 可以 > 1440）
+  const hrs = endMins > startMins ? (endMins - startMins) / 60 : 0;
+  const cost = Math.round(hrs * RATE);
+
+  // 跨午夜提示
+  document.getElementById('midnight-note').style.display = endMins >= 1440 ? '' : 'none';
+
+  document.getElementById('cost-area').innerHTML = hrs > 0
     ? `<div class="cost-box"><span class="cost-label">${hrs} 小時 × NT$${RATE}/hr</span><span class="cost-value">NT$${cost.toLocaleString()}</span></div>` : '';
-  const conflicts = d&&s&&e ? bookings.filter(b=>overlap(b,{date:d,startTime:s,endTime:e})) : [];
+
+  const conflicts = d && hrs > 0
+    ? bookings.filter(b => overlapMins(b, startMins, endMins, d)) : [];
   document.getElementById('conflict-area').innerHTML = conflicts.length
     ? `<div class="alert alert-warn">該時段已滿額，請選擇其他時間</div>` : '';
-  document.getElementById('submit-btn').disabled = conflicts.length>0;
+  document.getElementById('submit-btn').disabled = conflicts.length > 0 || hrs <= 0;
 }
 
 function resetForm() {
   ['f-band','f-contact','f-notes'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-start').value='10:00';
-  document.getElementById('f-end').value='12:00';
-  document.getElementById('f-date').value=today;
+  document.getElementById('f-start').value = 600;
+  document.getElementById('f-end').value   = 720;
+  document.getElementById('f-date').value  = today;
+  document.getElementById('midnight-note').style.display = 'none';
   ['err-area','cost-area','conflict-area','sync-area'].forEach(id=>document.getElementById(id).innerHTML='');
   document.getElementById('f-notes').classList.remove('required-empty');
   document.getElementById('submit-btn').disabled=false;
@@ -274,13 +361,12 @@ async function handleSubmit() {
   const band    = document.getElementById('f-band').value.trim();
   const contact = document.getElementById('f-contact').value.trim();
   const date    = document.getElementById('f-date').value;
-  const start   = document.getElementById('f-start').value;
-  const end     = document.getElementById('f-end').value;
+  const startMins = parseInt(document.getElementById('f-start').value);
+  const endMins   = parseInt(document.getElementById('f-end').value);
   const notes   = document.getElementById('f-notes').value.trim();
   const ea = document.getElementById('err-area');
   const riderEl = document.getElementById('f-notes');
 
-  // Rider 必填驗證
   if(!notes) {
     riderEl.classList.add('required-empty');
     riderEl.focus();
@@ -290,21 +376,36 @@ async function handleSubmit() {
     riderEl.classList.remove('required-empty');
   }
 
-  if(!band||!date||!start||!end){ ea.innerHTML='<div class="alert alert-err">請填寫所有必填欄位（樂團、日期、時間）</div>'; return; }
-  const hrs = (t2m(end)-t2m(start))/60;
-  if(hrs<=0){ ea.innerHTML='<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
+  if(!band||!date){ ea.innerHTML='<div class="alert alert-err">請填寫所有必填欄位（樂團、日期）</div>'; return; }
+  const hrs = (endMins - startMins) / 60;
+  if(hrs <= 0){ ea.innerHTML='<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
 
-  // 再次確認衝突（防止使用者繞過前端檢查直接送出）
-  const finalConflicts = date&&start&&end ? bookings.filter(b=>overlap(b,{date,startTime:start,endTime:end})) : [];
+  const finalConflicts = date && hrs > 0 ? bookings.filter(b => overlapMins(b, startMins, endMins, date)) : [];
   if(finalConflicts.length > 0){ showModal(); return; }
 
   ea.innerHTML='';
 
   const btn = document.getElementById('submit-btn');
   btn.disabled=true; btn.textContent='建立中…';
-  const cost = Math.round(hrs*RATE);
-  const payload = { bandName:band, contact, date, startTime:start, endTime:end, hours:hrs, cost,
-    clientType:'新客', bandType:'樂團', bookingStatus:'已確認', payStatus:'未付款', notes };
+  const cost = Math.round(hrs * RATE);
+
+  // 處理跨午夜：結束時間若 >= 1440 分鐘，結束日期為隔天
+  const startTimeStr = minsToTime(startMins);
+  const endTimeStr   = minsToTime(endMins);
+  const endDate      = getEndDate(date, endMins);
+
+  // 顯示用的時間標籤（保留 24:00+ 格式給確認頁）
+  const startLabel = TIME_OPTS.find(o=>o.value===startMins)?.label || startTimeStr;
+  const endLabel   = TIME_OPTS.find(o=>o.value===endMins)?.label   || endTimeStr;
+
+  const payload = {
+    bandName: band, contact, date, startTime: startTimeStr, endTime: endTimeStr,
+    endDate, hours: hrs, cost,
+    clientType:'新客', bandType:'樂團', bookingStatus:'已確認', payStatus:'未付款',
+    notes,
+    // 給顯示用
+    startLabel, endLabel,
+  };
 
   document.getElementById('sync-area').innerHTML = syncHTML('spin','spin');
 
@@ -319,11 +420,14 @@ async function handleSubmit() {
   document.getElementById('sync-area').innerHTML = syncHTML(gcal.ok?'ok':'err', notion.ok?'ok':'err');
 
   if(gcal.ok || notion.ok) {
-    bookings.push({id:Date.now()+'', bandName:band, date, startTime:start, endTime:end});
+    bookings.push({id:Date.now()+'', bandName:band, date, startTime:startTimeStr, endTime:endTimeStr});
     const cd = document.getElementById('confirm-detail');
+    const timeRange = endMins >= 1440
+      ? `${startLabel} – ${endLabel}（隔天）（${hrs}hr）`
+      : `${startLabel} – ${endLabel}（${hrs}hr）`;
     cd.innerHTML = [
       ['樂團',band],['日期',date],
-      ['時段',`${start} – ${end}（${hrs}hr）`],
+      ['時段', timeRange],
       ['費用',`NT$${cost.toLocaleString()}`],
       ['Rider',notes],
     ].filter(Boolean).map(([k,v])=>`<div class="detail-row"><span class="detail-key">${k}</span><span style="max-width:60%;text-align:right">${v}</span></div>`).join('');
@@ -351,9 +455,11 @@ async function fetchBookings() {
 
 document.getElementById('f-date').min = today;
 document.getElementById('f-date').value = today;
+document.getElementById('f-date').addEventListener('change', updateCost);
 document.getElementById('f-notes').addEventListener('input', function(){
   if(this.value.trim()) this.classList.remove('required-empty');
 });
+populateTimeSelects();
 renderCal();
 fetchBookings();
 </script>
