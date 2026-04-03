@@ -438,8 +438,8 @@ function resetForm() {
 function syncHTML(g, n) {
   function dot(s){ return '<span class="dot dot-'+s+'"></span>'; }
   function lbl(s){ return s==='spin'?'同步中…':s==='ok'?'同步成功':'同步失敗'; }
-  return '<div class="sync-row">'+dot(g)+' Google 日曆　'+lbl(g)+'</div>'
-       + '<div class="sync-row">'+dot(n)+' Notion　'+lbl(n)+'</div>';
+  return '<div class="sync-row">'+dot(g)+' _　'+lbl(g)+'</div>'
+       + '<div class="sync-row">'+dot(n)+' _　'+lbl(n)+'</div>';
 }
 
 // ── 送出預訂 ──────────────────────────────────
