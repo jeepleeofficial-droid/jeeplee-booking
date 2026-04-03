@@ -81,7 +81,6 @@ input,textarea,select,button{font-family:inherit}
     <button class="tab" onclick="switchTab('book')">新增預訂</button>
   </div>
 
-  <!-- 日曆 -->
   <div id="view-cal">
     <div class="month-nav">
       <button class="month-btn" onclick="changeMonth(-1)">←</button>
@@ -99,7 +98,6 @@ input,textarea,select,button{font-family:inherit}
     </div>
   </div>
 
-  <!-- 新增預訂 -->
   <div id="view-book" style="display:none">
     <div id="err-area"></div>
     <div class="prop-row">
@@ -136,7 +134,6 @@ input,textarea,select,button{font-family:inherit}
     <div id="sync-area" style="margin-top:.6rem"></div>
   </div>
 
-  <!-- 成功 -->
   <div id="view-confirm" style="display:none">
     <div class="success">
       <div class="success-check">✓</div>
@@ -265,6 +262,16 @@ async function handleSubmit() {
   }
 
   if(!band||!date||!start||!end){ ea.innerHTML='<div class="alert alert-err">請填寫所有必填欄位（樂團、日期、時間）</div>'; return; }
+  
+  // --- 新增：點擊建立時再次檢查時段衝突 ---
+  const hasConflict = bookings.some(b => overlap(b, {date, startTime: start, endTime: end}));
+  if (hasConflict) {
+    alert("❌ 此時段已有人預定，請選擇其他時間。");
+    ea.innerHTML = '<div class="alert alert-err">此時段已有人預定</div>';
+    return;
+  }
+  // ------------------------------------
+
   const hrs = (t2m(end)-t2m(start))/60;
   if(hrs<=0){ ea.innerHTML='<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
   ea.innerHTML='';
