@@ -14,7 +14,8 @@
 /* ================================================================
    樣式設定區 ── 在這裡調整顏色、字型大小
    ================================================================
-
+   #DE9151;   /* 橘色：小標題、強調用 *
+   #C57D59;   /* 磚紅色：預約按鈕、重點連結 *
    【常用顏色代碼參考】
    黑色   #1a1a1a   深灰   #555555   中灰   #9b9b9b   淺灰   #e8e8e8
    白色   #ffffff   米白   #f7f7f5   淡紅   #fff2f2   淡黃   #fffbf0
@@ -48,7 +49,7 @@ input,textarea,select,button{font-family:inherit}
 /* ── 副標題（Jeeplee 彩排室）── */
 .page-sub{
   font-size:14px;       /* 副標題大小 */
-  color:#9b9b9b;        /* 副標題顏色 */
+  color:#DE9151;        /* 副標題顏色 */
   margin-bottom:2rem;
 }
 
@@ -56,9 +57,9 @@ input,textarea,select,button{font-family:inherit}
 .tab-row{display:flex;border-bottom:1px solid #e8e8e8;margin-bottom:1.75rem}
 .tab{padding:8px 18px;font-size:14px;cursor:pointer;color:#9b9b9b;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
 .tab.active{
-  color:#1a1a1a;        /* 選中的 tab 文字顏色 */
+  color:#DE9151;        /* 選中的 tab 文字顏色 */
   font-weight:500;
-  border-bottom-color:#1a1a1a;  /* 選中的 tab 底線顏色 */
+  border-bottom-color:#DE9151;  /* 選中的 tab 底線顏色 */
 }
 .tab:hover:not(.active){color:#555}
 
@@ -137,7 +138,7 @@ input,textarea,select,button{font-family:inherit}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .cal-head{
   text-align:center;font-size:11px;
-  color:#ccc;           /* 星期標題顏色（日一二三四五六）*/
+  color:#DE9151;           /* 星期標題顏色（日一二三四五六）*/
   padding:4px 0;font-weight:500;
 }
 .cal-day{min-height:54px;padding:5px 4px;border-radius:6px;cursor:pointer;transition:background .1s}
