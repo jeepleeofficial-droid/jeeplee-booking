@@ -5,103 +5,331 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>彩排室預訂 · jeeplee</title>
 <style>
+
+/* ================================================================
+   樣式設定區 ── 在這裡調整顏色、字型大小
+   ================================================================
+
+   【常用顏色代碼參考】
+   黑色   #1a1a1a   深灰   #555555   中灰   #9b9b9b   淺灰   #e8e8e8
+   白色   #ffffff   米白   #f7f7f5   淡紅   #fff2f2   淡黃   #fffbf0
+
+   【字型大小參考】
+   超大標題  30px    大標題  22px    小標題  17px
+   內文      14px    說明文  13px    標籤    11px
+
+   ================================================================ */
+
+/* ── 整體頁面 ── */
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;background:#fff;color:#1a1a1a}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC','Segoe UI',sans-serif;
+  background:#fff;   /* 頁面底色 */
+  color:#1a1a1a;     /* 預設文字顏色 */
+}
 input,textarea,select,button{font-family:inherit}
+
+/* ── 頁面最大寬度與留白 ── */
 .page{padding:2.5rem 2.5rem 4rem;max-width:680px;margin:0 auto}
-.page-title{font-size:30px;font-weight:600;color:#1a1a1a;margin-bottom:.2rem}
-.page-sub{font-size:14px;color:#9b9b9b;margin-bottom:2rem}
+
+/* ── 頁面大標題（彩排室預訂）── */
+.page-title{
+  font-size:30px;       /* 標題大小 */
+  font-weight:600;
+  color:#1a1a1a;        /* 標題顏色 */
+  margin-bottom:.2rem;
+}
+
+/* ── 副標題（Jeeplee 彩排室）── */
+.page-sub{
+  font-size:14px;       /* 副標題大小 */
+  color:#9b9b9b;        /* 副標題顏色 */
+  margin-bottom:2rem;
+}
+
+/* ── Tab 分頁（日曆 / 新增預訂）── */
 .tab-row{display:flex;border-bottom:1px solid #e8e8e8;margin-bottom:1.75rem}
 .tab{padding:8px 18px;font-size:14px;cursor:pointer;color:#9b9b9b;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
-.tab.active{color:#1a1a1a;font-weight:500;border-bottom-color:#1a1a1a}
+.tab.active{
+  color:#1a1a1a;        /* 選中的 tab 文字顏色 */
+  font-weight:500;
+  border-bottom-color:#1a1a1a;  /* 選中的 tab 底線顏色 */
+}
 .tab:hover:not(.active){color:#555}
+
+/* ── 表單欄位列（label + input）── */
 .prop-row{display:flex;align-items:baseline;min-height:34px;padding:3px 0}
-.prop-label{font-size:14px;color:#9b9b9b;width:130px;flex-shrink:0;padding-top:4px}
+.prop-label{
+  font-size:14px;       /* 欄位標籤大小 */
+  color:#9b9b9b;        /* 欄位標籤顏色 */
+  width:130px;flex-shrink:0;padding-top:4px;
+}
 .prop-value{flex:1}
+
+/* ── 輸入框（文字輸入、下拉）── */
 .n-input{width:100%;background:none;border:none;outline:none;font-size:14px;color:#1a1a1a;padding:3px 6px;border-radius:4px;transition:background .12s}
-.n-input:hover,.n-input:focus{background:#f1f1ef}
-.n-input::placeholder{color:#ccc}
-.n-input.required-empty{background:#fff5f5}
+.n-input:hover,.n-input:focus{background:#f1f1ef}  /* 輸入框 hover/focus 底色 */
+.n-input::placeholder{color:#ccc}                  /* placeholder 文字顏色 */
+.n-input.required-empty{background:#fff5f5}         /* 未填必填欄位的紅色提示底色 */
+
+/* ── 分隔線 ── */
 .divider{height:1px;background:#f0f0f0;margin:1.25rem 0}
+
+/* ── 提示訊息（警告、錯誤）── */
 .alert{border-radius:0 7px 7px 0;padding:.55rem .9rem;margin:.6rem 0;font-size:13px;line-height:1.5}
-.alert-warn{background:#fffbf0;border-left:3px solid #f0c040;color:#9a7000}
-.alert-err{background:#fff2f2;border-left:3px solid #e05c5c;color:#b03030}
+.alert-warn{
+  background:#fffbf0;           /* 警告底色（時段衝突）*/
+  border-left:3px solid #f0c040;
+  color:#9a7000;                /* 警告文字顏色 */
+}
+.alert-err{
+  background:#fff2f2;           /* 錯誤底色（必填未填）*/
+  border-left:3px solid #e05c5c;
+  color:#b03030;                /* 錯誤文字顏色 */
+}
+
+/* ── 同步狀態列（Google 日曆 / Notion）── */
 .sync-row{display:flex;align-items:center;gap:7px;font-size:13px;color:#9b9b9b;margin:.3rem 0}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dot-ok{background:#52b76b}
-.dot-err{background:#e05c5c}
-.dot-spin{background:#ddd;animation:blink 1s infinite}
+.dot-ok{background:#52b76b}    /* 同步成功：綠色 */
+.dot-err{background:#e05c5c}   /* 同步失敗：紅色 */
+.dot-spin{background:#ddd;animation:blink 1s infinite}  /* 同步中：灰色閃爍 */
 @keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
-.btn-dark{padding:8px 18px;background:#1a1a1a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s}
+
+/* ── 按鈕：深色主按鈕（建立預訂）── */
+.btn-dark{
+  padding:8px 18px;
+  background:#1a1a1a;   /* 按鈕底色 */
+  color:#fff;           /* 按鈕文字顏色 */
+  border:none;border-radius:7px;
+  font-size:13px;font-weight:500;
+  cursor:pointer;transition:opacity .15s;
+}
 .btn-dark:hover{opacity:.8}
 .btn-dark:disabled{opacity:.3;cursor:not-allowed}
-.btn-outline{padding:8px 16px;background:none;border:1px solid #d8d8d8;border-radius:7px;font-size:13px;color:#555;cursor:pointer;transition:background .12s}
+
+/* ── 按鈕：外框次要按鈕（查看日曆）── */
+.btn-outline{
+  padding:8px 16px;background:none;
+  border:1px solid #d8d8d8;  /* 外框顏色 */
+  border-radius:7px;
+  font-size:13px;
+  color:#555;                /* 文字顏色 */
+  cursor:pointer;transition:background .12s;
+}
 .btn-outline:hover{background:#f7f7f5}
+
+/* ── 月曆導覽列 ── */
 .month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 .month-btn{background:none;border:none;cursor:pointer;color:#9b9b9b;font-size:18px;padding:3px 10px;border-radius:5px}
 .month-btn:hover{background:#f1f1ef}
-.month-label{font-size:15px;font-weight:500}
+.month-label{
+  font-size:15px;       /* 月份標題大小 */
+  font-weight:500;
+}
+
+/* ── 月曆格子 ── */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.cal-head{text-align:center;font-size:11px;color:#ccc;padding:4px 0;font-weight:500}
+.cal-head{
+  text-align:center;font-size:11px;
+  color:#ccc;           /* 星期標題顏色（日一二三四五六）*/
+  padding:4px 0;font-weight:500;
+}
 .cal-day{min-height:54px;padding:5px 4px;border-radius:6px;cursor:pointer;transition:background .1s}
 .cal-day:hover{background:#f7f7f5}
 .cal-day.selected{background:#f1f1ef}
 .day-num{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#9b9b9b;border-radius:50%}
-.cal-day.today .day-num{background:#1a1a1a;color:#fff}
-.booked-slot{font-size:10px;color:#9b9b9b;background:#f0f0f0;border-radius:3px;padding:1px 4px;margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.day-detail{background:#f7f7f5;border-radius:10px;padding:1rem;margin-top:1rem}
+.cal-day.today .day-num{
+  background:#1a1a1a;   /* 今天日期圓點底色 */
+  color:#fff;           /* 今天日期數字顏色 */
+}
+
+/* ── 月曆格子內的預訂標籤 ── */
+.booked-slot{
+  font-size:10px;
+  color:#9b9b9b;         /* 「已預定」文字顏色 */
+  background:#f0f0f0;    /* 「已預定」標籤底色 */
+  border-radius:3px;padding:1px 4px;margin-top:2px;
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+
+/* ── 日期詳情區塊 ── */
+.day-detail{
+  background:#f7f7f5;   /* 詳情區塊底色 */
+  border-radius:10px;padding:1rem;margin-top:1rem;
+}
 .detail-head{font-size:12px;color:#ccc;margin-bottom:.7rem}
 .b-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #ececec;align-items:center}
 .b-item:last-child{border-bottom:none}
-.b-bar{width:3px;height:36px;background:#1a1a1a;border-radius:2px;flex-shrink:0}
-.b-time{font-size:14px;color:#1a1a1a}
-.b-status{font-size:12px;color:#9b9b9b;margin-top:2px}
+.b-bar{
+  width:3px;height:36px;
+  background:#1a1a1a;   /* 預訂左側色條顏色 */
+  border-radius:2px;flex-shrink:0;
+}
+.b-time{
+  font-size:14px;
+  color:#1a1a1a;        /* 時段文字顏色 */
+}
+.b-status{
+  font-size:12px;
+  color:#9b9b9b;        /* 「已預定」說明文字顏色 */
+  margin-top:2px;
+}
 .empty{font-size:13px;color:#ccc;text-align:center;padding:1.2rem 0}
+
+/* ── 預訂成功頁 ── */
 .success{text-align:center;padding:3rem 0}
 .success-check{font-size:40px;margin-bottom:1rem}
-.success-title{font-size:22px;font-weight:600;margin-bottom:.25rem}
-.success-sub{font-size:14px;color:#9b9b9b;margin-bottom:2rem}
+.success-title{
+  font-size:22px;font-weight:600;
+  margin-bottom:.25rem;
+}
+.success-sub{
+  font-size:14px;
+  color:#9b9b9b;        /* 感謝文字顏色 */
+  margin-bottom:2rem;
+}
 .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
 .detail-key{color:#9b9b9b}
 .ext-link{color:#0060c0;font-size:13px;text-decoration:none}
 .ext-link:hover{text-decoration:underline}
-.required-mark{color:#e05c5c;margin-left:2px;font-size:12px}
-.notice-box{background:#f7f7f5;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;border-left:3px solid #1a1a1a}
-.notice-title{font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:.6rem}
+
+/* ── 必填星號（*）── */
+.required-mark{
+  color:#e05c5c;        /* 必填星號顏色 */
+  margin-left:2px;font-size:12px;
+}
+
+/* ================================================================
+   使用須知樣式
+   ================================================================ */
+.notice-box{
+  background:#f7f7f5;           /* 使用須知底色 */
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  margin-bottom:1.5rem;
+  border-left:3px solid #1a1a1a; /* 使用須知左側線條顏色 */
+}
+.notice-title{
+  font-size:13px;font-weight:600;
+  color:#1a1a1a;                /* 使用須知標題顏色 */
+  margin-bottom:.6rem;
+}
 .notice-list{list-style:none;padding:0;margin:0}
-.notice-list li{font-size:13px;color:#555;padding:3px 0 3px 1rem;position:relative;line-height:1.6}
+.notice-list li{
+  font-size:13px;               /* 使用須知條文大小 */
+  color:#555;                   /* 使用須知條文顏色 */
+  padding:3px 0 3px 1rem;position:relative;line-height:1.6;
+}
 .notice-list li::before{content:'·';position:absolute;left:0;color:#9b9b9b}
-/* 時間滑桿 */
+
+/* ================================================================
+   時間滑桿樣式
+   ================================================================ */
 .slider-section{margin:.75rem 0 1.25rem}
-.slider-label{font-size:14px;color:#9b9b9b;margin-bottom:.75rem}
+.slider-label{
+  font-size:14px;
+  color:#9b9b9b;        /* 「時段」標籤顏色 */
+  margin-bottom:.75rem;
+}
 .track-area{position:relative;height:44px;cursor:pointer;user-select:none}
-.track-bg{position:absolute;top:50%;left:0;right:0;height:3px;background:#e8e8e8;border-radius:2px;transform:translateY(-50%)}
-.track-fill{position:absolute;top:50%;height:3px;background:#1a1a1a;border-radius:2px;transform:translateY(-50%);pointer-events:none}
-.s-thumb{position:absolute;top:50%;width:18px;height:18px;background:#fff;border:2px solid #1a1a1a;border-radius:50%;transform:translate(-50%,-50%);cursor:grab;touch-action:none;transition:box-shadow .15s}
+.track-bg{
+  position:absolute;top:50%;left:0;right:0;
+  height:3px;
+  background:#e8e8e8;   /* 滑桿軌道底色 */
+  border-radius:2px;transform:translateY(-50%);
+}
+.track-fill{
+  position:absolute;top:50%;
+  height:3px;
+  background:#1a1a1a;   /* 滑桿選取區段顏色 */
+  border-radius:2px;transform:translateY(-50%);pointer-events:none;
+}
+.s-thumb{
+  position:absolute;top:50%;width:18px;height:18px;
+  background:#fff;              /* 滑桿圓點底色 */
+  border:2px solid #1a1a1a;     /* 滑桿圓點邊框顏色 */
+  border-radius:50%;transform:translate(-50%,-50%);
+  cursor:grab;touch-action:none;transition:box-shadow .15s;
+}
 .s-thumb:active{cursor:grabbing;box-shadow:0 0 0 4px #e8e8e8}
 .tick-row{display:flex;justify-content:space-between;margin-bottom:.75rem}
-.tick{font-size:10px;color:#ccc;text-align:center}
-.time-result{display:flex;align-items:center;gap:12px;padding:.75rem 1rem;background:#f7f7f5;border-radius:8px}
+.tick{
+  font-size:10px;
+  color:#ccc;           /* 時間刻度文字顏色 */
+  text-align:center;
+}
+.time-result{
+  display:flex;align-items:center;gap:12px;
+  padding:.75rem 1rem;
+  background:#f7f7f5;   /* 時間顯示區底色 */
+  border-radius:8px;
+}
 .time-block{flex:1}
-.time-block-label{font-size:11px;color:#9b9b9b;margin-bottom:2px}
-.time-block-val{font-size:20px;font-weight:600;color:#1a1a1a;letter-spacing:-.5px}
+.time-block-label{
+  font-size:11px;
+  color:#9b9b9b;        /* 「開始」「結束」標籤顏色 */
+  margin-bottom:2px;
+}
+.time-block-val{
+  font-size:20px;font-weight:600;
+  color:#1a1a1a;        /* 時間數字顏色（10:00 / 14:00）*/
+  letter-spacing:-.5px;
+}
 .time-sep{font-size:16px;color:#ccc;flex-shrink:0}
-.time-dur{font-size:13px;color:#9b9b9b;margin-left:auto}
-.next-day-tag{display:inline-block;font-size:11px;color:#555;background:#e8e8e8;border-radius:999px;padding:1px 7px;margin-top:3px}
-/* Modal */
+.time-dur{
+  font-size:13px;
+  color:#9b9b9b;        /* 時長顯示顏色（4 hr）*/
+  margin-left:auto;
+}
+.next-day-tag{
+  display:inline-block;font-size:11px;
+  color:#555;           /* 「隔天」標籤文字顏色 */
+  background:#e8e8e8;   /* 「隔天」標籤底色 */
+  border-radius:999px;padding:1px 7px;margin-top:3px;
+}
+
+/* ================================================================
+   衝突警告 Modal 樣式
+   ================================================================ */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.show{opacity:1;pointer-events:all}
-.modal-box{background:#fff;border-radius:12px;padding:2rem 2rem 1.5rem;max-width:320px;width:90%;text-align:center;transform:scale(.95);transition:transform .2s}
+.modal-box{
+  background:#fff;      /* Modal 底色 */
+  border-radius:12px;padding:2rem 2rem 1.5rem;
+  max-width:320px;width:90%;text-align:center;
+  transform:scale(.95);transition:transform .2s;
+}
 .modal-overlay.show .modal-box{transform:scale(1)}
 .modal-icon{font-size:32px;margin-bottom:.75rem}
-.modal-title{font-size:17px;font-weight:600;margin-bottom:.4rem}
-.modal-msg{font-size:14px;color:#9b9b9b;line-height:1.6;margin-bottom:1.5rem}
-.modal-btn{padding:9px 28px;background:#1a1a1a;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer}
+.modal-title{
+  font-size:17px;font-weight:600;
+  margin-bottom:.4rem;
+}
+.modal-msg{
+  font-size:14px;
+  color:#9b9b9b;        /* Modal 說明文字顏色 */
+  line-height:1.6;margin-bottom:1.5rem;
+}
+.modal-btn{
+  padding:9px 28px;
+  background:#1a1a1a;   /* Modal 按鈕底色 */
+  color:#fff;           /* Modal 按鈕文字顏色 */
+  border:none;border-radius:7px;
+  font-size:13px;font-weight:500;cursor:pointer;
+}
 .modal-btn:hover{opacity:.8}
+
 </style>
 </head>
 <body>
 <div class="page">
+
+  <!-- ============================================================
+       頁面標題區
+       page-title = 大標題
+       page-sub   = 副標題
+       ============================================================ -->
   <div class="page-title">彩排室預訂</div>
   <div class="page-sub">Jeeplee 彩排室</div>
 
@@ -214,7 +442,7 @@ input,textarea,select,button{font-family:inherit}
     <div id="sync-area" style="margin-top:.6rem"></div>
   </div>
 
-  <!-- 成功 -->
+  <!-- 成功頁 -->
   <div id="view-confirm" style="display:none">
     <div class="success">
       <div class="success-check">✓</div>
@@ -246,10 +474,9 @@ var cy = new Date().getFullYear();
 var cm = new Date().getMonth();
 var today = new Date().toISOString().slice(0,10);
 
-// ── 滑桿狀態（每格 = 30 分鐘，0~56 格）──────
-var MAX_SLOT = 56; // 28hr * 2
-var startSlot = 20; // 10:00
-var endSlot   = 28; // 14:00
+var MAX_SLOT = 56;
+var startSlot = 20;
+var endSlot   = 28;
 
 function slotToMins(s) { return s * 30; }
 function slotToLabel(s) {
@@ -273,7 +500,6 @@ function getEndDate(baseDate, endMins) {
   return baseDate;
 }
 
-// ── 滑桿 render ───────────────────────────────
 function renderSlider() {
   var fill = document.getElementById('track-fill');
   var ts   = document.getElementById('thumb-s');
@@ -284,15 +510,12 @@ function renderSlider() {
   fill.style.width = (pctE - pctS) + '%';
   ts.style.left = pctS + '%';
   te.style.left = pctE + '%';
-
-  var startMins = slotToMins(startSlot);
-  var endMins   = slotToMins(endSlot);
+  var endMins = slotToMins(endSlot);
   document.getElementById('disp-start').textContent = slotToLabel(startSlot);
   document.getElementById('disp-end').textContent   = slotToLabel(endSlot);
   var durH = (endSlot - startSlot) / 2;
   document.getElementById('disp-dur').textContent = (durH % 1 === 0 ? durH : durH.toFixed(1)) + ' hr';
   document.getElementById('next-day-tag').style.display = endMins >= 1440 ? '' : 'none';
-
   checkConflict();
 }
 
@@ -334,7 +557,6 @@ document.getElementById('thumb-s').addEventListener('touchstart', initDrag(true)
 document.getElementById('thumb-e').addEventListener('mousedown', initDrag(false));
 document.getElementById('thumb-e').addEventListener('touchstart', initDrag(false), {passive:false});
 
-// ── 衝突偵測 ──────────────────────────────────
 function t2m(t) {
   var parts = t.split(':');
   return parseInt(parts[0]) * 60 + parseInt(parts[1]);
@@ -366,14 +588,12 @@ function checkConflict() {
   document.getElementById('submit-btn').disabled = conflicts.length > 0;
 }
 
-// ── Modal ─────────────────────────────────────
 function showModal() { document.getElementById('conflict-modal').classList.add('show'); }
 function closeModal() { document.getElementById('conflict-modal').classList.remove('show'); }
 document.getElementById('conflict-modal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
 
-// ── Tab ───────────────────────────────────────
 function switchTab(tab) {
   var tabs = document.querySelectorAll('.tab');
   var names = ['cal','book'];
@@ -386,7 +606,6 @@ function switchTab(tab) {
   if (tab === 'cal') renderCal();
 }
 
-// ── 月曆 ──────────────────────────────────────
 function changeMonth(d) {
   var dt = new Date(cy, cm+d); cy=dt.getFullYear(); cm=dt.getMonth(); renderCal();
 }
@@ -424,7 +643,6 @@ function renderDetail() {
   }).join('');
 }
 
-// ── 重設表單 ──────────────────────────────────
 function resetForm() {
   document.getElementById('f-band').value    = '';
   document.getElementById('f-contact').value = '';
@@ -433,13 +651,14 @@ function resetForm() {
   document.getElementById('f-date').value    = today;
   startSlot = 20; endSlot = 28;
   renderSlider();
-  document.getElementById('f-notes').classList.remove('required-empty');
+  ['f-band','f-contact','f-contact-method','f-notes'].forEach(function(id){
+    document.getElementById(id).classList.remove('required-empty');
+  });
   document.getElementById('submit-btn').disabled = false;
   ['err-area','conflict-area','sync-area'].forEach(function(id){ document.getElementById(id).innerHTML=''; });
   switchTab('book');
 }
 
-// ── 同步狀態 ──────────────────────────────────
 function syncHTML(g, n) {
   function dot(s){ return '<span class="dot dot-'+s+'"></span>'; }
   function lbl(s){ return s==='spin'?'同步中…':s==='ok'?'同步成功':'同步失敗'; }
@@ -447,7 +666,6 @@ function syncHTML(g, n) {
        + '<div class="sync-row">'+dot(n)+' Notion　'+lbl(n)+'</div>';
 }
 
-// ── 送出預訂 ──────────────────────────────────
 function handleSubmit() {
   var band          = document.getElementById('f-band').value.trim();
   var contact       = document.getElementById('f-contact').value.trim();
@@ -458,7 +676,6 @@ function handleSubmit() {
   var startMins     = slotToMins(startSlot);
   var endMins       = slotToMins(endSlot);
 
-  // 必填驗證：所有欄位
   var missing = [];
   if (!band)          missing.push('樂團 / 藝人');
   if (!contact)       missing.push('聯絡人');
@@ -467,59 +684,46 @@ function handleSubmit() {
   if (!notes)         missing.push('Rider');
 
   if (missing.length > 0) {
-    // 標記空白欄位
-    var fieldMap = {
-      'f-band':           band,
-      'f-contact':        contact,
-      'f-contact-method': contactMethod,
-      'f-notes':          notes,
-    };
+    var fieldMap = {'f-band':band,'f-contact':contact,'f-contact-method':contactMethod,'f-notes':notes};
     Object.keys(fieldMap).forEach(function(id) {
-      var el = document.getElementById(id);
-      if (!fieldMap[id]) {
-        el.classList.add('required-empty');
-      } else {
-        el.classList.remove('required-empty');
-      }
+      document.getElementById(id).classList[fieldMap[id]?'remove':'add']('required-empty');
     });
     ea.innerHTML = '<div class="alert alert-err">請填寫所有必填欄位：' + missing.join('、') + '</div>';
     return;
   }
 
-  // 清除所有紅框
-  ['f-band','f-contact','f-contact-method','f-notes'].forEach(function(id) {
+  ['f-band','f-contact','f-contact-method','f-notes'].forEach(function(id){
     document.getElementById(id).classList.remove('required-empty');
   });
   ea.innerHTML = '';
+
   var hrs = (endMins - startMins) / 60;
-  if (hrs <= 0) {
-    ea.innerHTML = '<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return;
-  }
+  if (hrs <= 0) { ea.innerHTML = '<div class="alert alert-err">結束時間必須晚於開始時間</div>'; return; }
+
   var conflicts = bookings.filter(function(b){ return overlapCheck(b, startMins, endMins, date); });
   if (conflicts.length > 0) { showModal(); return; }
 
-  ea.innerHTML = '';
   var btn = document.getElementById('submit-btn');
   btn.disabled = true; btn.textContent = '建立中…';
 
-  var startStr = minsToTimeStr(startMins);
-  var endStr   = minsToTimeStr(endMins);
-  var endDate  = getEndDate(date, endMins);
+  var startStr   = minsToTimeStr(startMins);
+  var endStr     = minsToTimeStr(endMins);
+  var endDate    = getEndDate(date, endMins);
   var startLabel = slotToLabel(startSlot);
   var endLabel   = slotToLabel(endSlot);
 
   var payload = {
-    bandName: band, contact: contact, contactMethod: contactMethod, date: date,
-    startTime: startStr, endTime: endStr, endDate: endDate,
-    clientType: '新客', bandType: '樂團', bookingStatus: '待確認', payStatus: '未付款',
-    notes: notes
+    bandName:band, contact:contact, contactMethod:contactMethod, date:date,
+    startTime:startStr, endTime:endStr, endDate:endDate,
+    clientType:'新客', bandType:'樂團', bookingStatus:'待確認', payStatus:'未付款',
+    notes:notes
   };
 
   document.getElementById('sync-area').innerHTML = syncHTML('spin','spin');
 
   Promise.allSettled([
-    fetch('/api/google-calendar', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();}),
-    fetch('/api/notion',          {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();})
+    fetch('/api/google-calendar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();}),
+    fetch('/api/notion',         {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){return r.json();})
   ]).then(function(results) {
     var gcal   = results[0].status==='fulfilled' ? results[0].value : {ok:false};
     var notion = results[1].status==='fulfilled' ? results[1].value : {ok:false};
@@ -547,7 +751,6 @@ function handleSubmit() {
   });
 }
 
-// ── 載入預訂 ──────────────────────────────────
 function fetchBookings() {
   fetch('/api/google-calendar').then(function(r){return r.json();}).then(function(d){
     if (d.ok && Array.isArray(d.bookings)) bookings = d.bookings;
@@ -555,7 +758,6 @@ function fetchBookings() {
   }).catch(function(){ renderCal(); });
 }
 
-// ── 事件監聽 ──────────────────────────────────
 document.getElementById('f-date').addEventListener('change', checkConflict);
 ['f-band','f-contact','f-contact-method','f-notes'].forEach(function(id) {
   document.getElementById(id).addEventListener('input', function() {
@@ -563,7 +765,6 @@ document.getElementById('f-date').addEventListener('change', checkConflict);
   });
 });
 
-// ── 初始化 ────────────────────────────────────
 document.getElementById('f-date').min   = today;
 document.getElementById('f-date').value = today;
 renderSlider();
