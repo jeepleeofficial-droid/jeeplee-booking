@@ -124,21 +124,35 @@ input,textarea,select,button{font-family:inherit}
   color:#DE9151;           /* 星期標題顏色（日一二三四五六）*/
   padding:4px 0;font-weight:500;
 }
-.cal-day{min-height:54px;padding:5px 4px;border-radius:6px;cursor:pointer;transition:background .1s}
+.cal-day{
+  height:80px;padding:5px 4px 4px;
+  border-radius:6px;cursor:pointer;
+  transition:background .1s;
+  overflow:hidden;          /* 固定高度，超過裁切 */
+  display:flex;flex-direction:column;
+}
 .cal-day:hover{background:#f7f7f5}
 .cal-day.selected{background:#f1f1ef}
-.day-num{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#9b9b9b;border-radius:50%}
+.day-num{
+  width:22px;height:22px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:13px;color:#9b9b9b;border-radius:50%;
+  flex-shrink:0;
+}
 .cal-day.today .day-num{
   background:#1a1a1a;   /* 今天日期圓點底色 */
   color:#fff;           /* 今天日期數字顏色 */
 }
 /* ── 月曆格子內的預訂標籤 ── */
 .booked-slot{
-  font-size:10px;
-  color:#9b9b9b;         /* 「已預定」文字顏色 */
-  background:#f0f0f0;    /* 「已預定」標籤底色 */
-  border-radius:3px;padding:1px 4px;margin-top:2px;
+  font-size:10px;line-height:1.3;
+  color:#fff;
+  background:#C57D59;    /* 預訂標籤底色（與主題色一致）*/
+  border-radius:3px;
+  padding:2px 5px;
+  margin-top:3px;
   overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  flex-shrink:0;
 }
 /* ── 日期詳情區塊 ── */
 .day-detail{
@@ -611,8 +625,8 @@ function renderCal() {
     var bks = bookings.filter(function(b){ return b.date === ds; });
     var el = document.createElement('div');
     el.className = 'cal-day' + (ds===today?' today':'') + (ds===selDate?' selected':'');
-    var slots = bks.slice(0,2).map(function(b){ return '<div class="booked-slot">'+b.startTime+'–'+b.endTime+' 已預定</div>'; }).join('');
-    var more  = bks.length > 2 ? '<div class="booked-slot">+' + (bks.length-2) + ' 筆</div>' : '';
+    var slots = bks.slice(0,2).map(function(b){ return '<div class="booked-slot">'+b.startTime+'–'+b.endTime+'</div>'; }).join('');
+    var more  = bks.length > 2 ? '<div class="booked-slot" style="background:#9b9b9b">+' + (bks.length-2) + ' 筆</div>' : '';
     el.innerHTML = '<div class="day-num">' + d + '</div>' + slots + more;
     (function(ds){ el.onclick = function(){ selDate=ds; renderCal(); renderDetail(); }; })(ds);
     body.appendChild(el);
