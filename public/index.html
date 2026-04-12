@@ -403,10 +403,9 @@ input,textarea,select,button{font-family:inherit}
         <div class="s-thumb" id="thumb-e"></div>
       </div>
       <div class="tick-row">
-        <div class="tick">10:00</div>
-        <div class="tick">13:00</div>
-        <div class="tick">16:00</div>
-        <div class="tick">19:00</div>
+        <div class="tick">11:00</div>
+        <div class="tick">14:00</div>
+        <div class="tick">17:00</div>
         <div class="tick">20:00</div>
         <div class="tick">22:00</div>
       </div>
@@ -475,9 +474,10 @@ var selDate = new Date().toISOString().slice(0,10);
 var cy = new Date().getFullYear();
 var cm = new Date().getMonth();
 var today = new Date().toISOString().slice(0,10);
-var MAX_SLOT = 56;
-var startSlot = 20;
-var endSlot   = 28;
+var SLOT_MIN  = 22;  // 11:00
+var SLOT_MAX  = 44;  // 22:00
+var startSlot = 22;  // 預設開始 11:00
+var endSlot   = 28;  // 預設結束 14:00
 function slotToMins(s) { return s * 30; }
 function slotToLabel(s) {
   var total = s * 30;
@@ -503,8 +503,8 @@ function renderSlider() {
   var fill = document.getElementById('track-fill');
   var ts   = document.getElementById('thumb-s');
   var te   = document.getElementById('thumb-e');
-  var pctS = (startSlot / MAX_SLOT * 100).toFixed(2);
-  var pctE = (endSlot   / MAX_SLOT * 100).toFixed(2);
+  var pctS = ((startSlot - SLOT_MIN) / (SLOT_MAX - SLOT_MIN) * 100).toFixed(2);
+  var pctE = ((endSlot   - SLOT_MIN) / (SLOT_MAX - SLOT_MIN) * 100).toFixed(2);
   fill.style.left  = pctS + '%';
   fill.style.width = (pctE - pctS) + '%';
   ts.style.left = pctS + '%';
@@ -521,7 +521,7 @@ function slotFromX(x) {
   var area = document.getElementById('track-area');
   var rect = area.getBoundingClientRect();
   var ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
-  return Math.round(ratio * MAX_SLOT);
+  return Math.round(ratio * (SLOT_MAX - SLOT_MIN) + SLOT_MIN);
 }
 function initDrag(isStart) {
   return function(e) {
@@ -530,9 +530,9 @@ function initDrag(isStart) {
       var x = ev.touches ? ev.touches[0].clientX : ev.clientX;
       var s = slotFromX(x);
       if (isStart) {
-        startSlot = Math.max(0, Math.min(s, endSlot - 2));
+        startSlot = Math.max(SLOT_MIN, Math.min(s, endSlot - 6));
       } else {
-        endSlot = Math.min(MAX_SLOT, Math.max(s, startSlot + 2));
+        endSlot = Math.min(SLOT_MAX, Math.max(s, startSlot + 6));
       }
       renderSlider();
     };
@@ -636,7 +636,7 @@ function resetForm() {
   document.getElementById('f-contact-method').value = '';
   document.getElementById('f-notes').value   = '';
   document.getElementById('f-date').value    = today;
-  startSlot = 20; endSlot = 28;
+  startSlot = 22; endSlot = 28;
   renderSlider();
   ['f-band','f-contact','f-contact-method','f-notes'].forEach(function(id){
     document.getElementById(id).classList.remove('required-empty');
